@@ -2011,7 +2011,7 @@ module turbos_vault::vault {
             let v4 = borrow_mut_clmm_base_nft(arg3, v0);
             let (_, _, v7) = turbos_clmm::position_manager::get_position_info(arg6, sui::object::id_address<turbos_clmm::position_nft::TurbosPositionNFT>(v4));
             if (v7 > 0) {
-                let (v8, v9) = decrease_clmm_liquidity<T0, T1, T2>(v4, arg5, arg6, turbos_clmm::full_math_u128::mul_div_floor(v7, arg7 as u128, 1000000 as u128), arg9, arg10, arg11);
+                let (v8, v9) = decrease_clmm_liquidity<T0, T1, T2>(v4, arg5, arg6, turbos_clmm::full_math_u128::mul_div_floor(v7, (arg7 as u128), (1000000 as u128)), arg9, arg10, arg11);
                 let (_, _, v12) = turbos_clmm::position_manager::get_position_info(arg6, sui::object::id_address<turbos_clmm::position_nft::TurbosPositionNFT>(v4));
                 v3 = v12;
                 sui::coin::join<T0>(&mut v1, v8);
@@ -2023,7 +2023,7 @@ module turbos_vault::vault {
             let v14 = borrow_mut_clmm_limit_nft(arg3, v0);
             let (_, _, v17) = turbos_clmm::position_manager::get_position_info(arg6, sui::object::id_address<turbos_clmm::position_nft::TurbosPositionNFT>(v14));
             if (v17 > 0) {
-                let (v18, v19) = decrease_clmm_liquidity<T0, T1, T2>(v14, arg5, arg6, turbos_clmm::full_math_u128::mul_div_floor(v17, arg7 as u128, 1000000 as u128), arg9, arg10, arg11);
+                let (v18, v19) = decrease_clmm_liquidity<T0, T1, T2>(v14, arg5, arg6, turbos_clmm::full_math_u128::mul_div_floor(v17, (arg7 as u128), (1000000 as u128)), arg9, arg10, arg11);
                 let (_, _, v22) = turbos_clmm::position_manager::get_position_info(arg6, sui::object::id_address<turbos_clmm::position_nft::TurbosPositionNFT>(v14));
                 v13 = v22;
                 sui::coin::join<T0>(&mut v1, v18);
@@ -2043,10 +2043,10 @@ module turbos_vault::vault {
             (v26, v27)
         };
         if (arg8 && arg7 == 1000000) {
-            if (v29) {
+            if (v24) {
                 burn_clmm_base_nft<T0, T1, T2>(arg3, v0, arg6, arg10, arg11);
             };
-            if (v30) {
+            if (v25) {
                 burn_clmm_limit_nft<T0, T1, T2>(arg3, v0, arg6, arg10, arg11);
             };
         };
