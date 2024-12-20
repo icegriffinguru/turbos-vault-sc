@@ -1,4 +1,8 @@
 module turbos_vault::config {
+    ////////////////////////////////////////////////
+    /// Structs
+    ////////////////////////////////////////////////
+    
     struct AdminCap has store, key {
         id: sui::object::UID,
     }
@@ -23,6 +27,10 @@ module turbos_vault::config {
         id: sui::object::UID,
         user_tiers: sui::table::Table<address, Tier>,
     }
+    
+    ////////////////////////////////////////////////
+    /// Events
+    ////////////////////////////////////////////////
     
     struct InitConfigEvent has copy, drop {
         admin_cap_id: sui::object::ID,
@@ -70,6 +78,27 @@ module turbos_vault::config {
         user_tier_config_id: sui::object::ID,
     }
     
+    ////////////////////////////////////////////////
+    /// Functions
+    ////////////////////////////////////////////////
+
+    fun init(ctx: &mut sui::tx_context::TxContext) {
+        let admin_cap = AdminCap{id: sui::object::new(ctx)};
+        let global_config = GlobalConfig{
+            id              : sui::object::new(ctx), 
+            acl             : turbos_vault::acl::new(ctx), 
+            package_version : 1, 
+            user_tiers      : sui::vec_map::empty<address, Tier>(),
+        };
+        sui::transfer::public_transfer<AdminCap>(admin_cap, sui::tx_context::sender(ctx));
+        sui::transfer::public_share_object<GlobalConfig>(global_config);
+        let event = InitConfigEvent{
+            admin_cap_id     : sui::object::id<AdminCap>(&admin_cap), 
+            global_config_id : sui::object::id<GlobalConfig>(&global_config),
+        };
+        sui::event::emit<InitConfigEvent>(event);
+    }
+
     public(friend) fun add_role(arg0: &AdminCap, arg1: &mut GlobalConfig, arg2: address, arg3: u8) {
         checked_package_version(arg1);
         turbos_vault::acl::add_role(&mut arg1.acl, arg2, arg3);
@@ -152,23 +181,6 @@ module turbos_vault::config {
         } else {
             (0, 0)
         }
-    }
-    
-    fun init(arg0: &mut sui::tx_context::TxContext) {
-        let v0 = AdminCap{id: sui::object::new(arg0)};
-        let v1 = GlobalConfig{
-            id              : sui::object::new(arg0), 
-            acl             : turbos_vault::acl::new(arg0), 
-            package_version : 1, 
-            user_tiers      : sui::vec_map::empty<address, Tier>(),
-        };
-        sui::transfer::public_transfer<AdminCap>(v0, sui::tx_context::sender(arg0));
-        sui::transfer::public_share_object<GlobalConfig>(v1);
-        let v2 = InitConfigEvent{
-            admin_cap_id     : sui::object::id<AdminCap>(&v0), 
-            global_config_id : sui::object::id<GlobalConfig>(&v1),
-        };
-        sui::event::emit<InitConfigEvent>(v2);
     }
     
     public(friend) fun new_user_tier_config(arg0: &AdminCap, arg1: &mut sui::tx_context::TxContext) {
