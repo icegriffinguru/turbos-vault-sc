@@ -90,7 +90,8 @@ module turbos_vault::router {
         arg12: u32,
         arg13: &mut sui::tx_context::TxContext
     ) {
-        sui::transfer::public_share_object<turbos_vault::vault::Strategy>(turbos_vault::vault::create_strategy<T0, T1, T2>(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+        let strategy = turbos_vault::vault::create_strategy<T0, T1, T2>(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+        sui::transfer::public_share_object<turbos_vault::vault::Strategy>(strategy);
     }
     
     public entry fun deposit<T0, T1, T2>(
@@ -258,25 +259,25 @@ module turbos_vault::router {
         turbos_vault::vault::update_vault_performance_fee_rate(arg0, arg1, arg2, arg3, arg4);
     }
     
-    public entry fun withdraw_v2<T0, T1, T2>(
-        arg0: &turbos_vault::config::GlobalConfig,
-        arg1: &mut turbos_vault::config::UserTierConfig,
-        arg2: &mut turbos_vault::rewarder::RewarderManager,
-        arg3: &mut turbos_vault::vault::Strategy,
-        arg4: &mut turbos_vault::vault::Vault,
-        arg5: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
-        arg6: &mut turbos_clmm::position_manager::Positions,
-        arg7: u64,
-        arg8: bool,
-        arg9: address,
-        arg10: &sui::clock::Clock,
-        arg11: &turbos_clmm::pool::Versioned,
-        arg12: &mut sui::tx_context::TxContext
-    ) {
-        let (v0, v1) = turbos_vault::vault::withdraw_v2<T0, T1, T2>(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg10, arg11, arg12);
-        sui::transfer::public_transfer<sui::coin::Coin<T0>>(v0, arg9);
-        sui::transfer::public_transfer<sui::coin::Coin<T1>>(v1, arg9);
-    }
+    // public entry fun withdraw_v2<T0, T1, T2>(
+    //     arg0: &turbos_vault::config::GlobalConfig,
+    //     arg1: &mut turbos_vault::config::UserTierConfig,
+    //     arg2: &mut turbos_vault::rewarder::RewarderManager,
+    //     arg3: &mut turbos_vault::vault::Strategy,
+    //     arg4: &mut turbos_vault::vault::Vault,
+    //     arg5: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+    //     arg6: &mut turbos_clmm::position_manager::Positions,
+    //     arg7: u64,
+    //     arg8: bool,
+    //     arg9: address,
+    //     arg10: &sui::clock::Clock,
+    //     arg11: &turbos_clmm::pool::Versioned,
+    //     arg12: &mut sui::tx_context::TxContext
+    // ) {
+    //     let (v0, v1) = turbos_vault::vault::withdraw_v2<T0, T1, T2>(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg10, arg11, arg12);
+    //     sui::transfer::public_transfer<sui::coin::Coin<T0>>(v0, arg9);
+    //     sui::transfer::public_transfer<sui::coin::Coin<T1>>(v1, arg9);
+    // }
     
     public entry fun open_vault_and_deposit<T0, T1, T2>(
         arg0: &turbos_vault::config::GlobalConfig,

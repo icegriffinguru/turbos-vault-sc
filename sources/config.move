@@ -92,11 +92,13 @@ module turbos_vault::config {
             package_version : 1, 
             user_tiers      : sui::vec_map::empty<address, Tier>(),
         };
+        let admin_cap_id = sui::object::id<AdminCap>(&admin_cap);
+        let global_config_id = sui::object::id<GlobalConfig>(&global_config);
         sui::transfer::public_transfer<AdminCap>(admin_cap, sui::tx_context::sender(ctx));
         sui::transfer::public_share_object<GlobalConfig>(global_config);
         let event = InitConfigEvent{
-            admin_cap_id     : sui::object::id<AdminCap>(&admin_cap), 
-            global_config_id : sui::object::id<GlobalConfig>(&global_config),
+            admin_cap_id     : admin_cap_id, 
+            global_config_id : global_config_id,
         };
         sui::event::emit<InitConfigEvent>(event);
     }
@@ -151,10 +153,11 @@ module turbos_vault::config {
     ) {
         checked_package_version(arg1);
         let v0 = OperatorCap{id: sui::object::new(arg4)};
+        let operator_cap_id = sui::object::id<OperatorCap>(&v0);
         turbos_vault::acl::set_roles(&mut arg1.acl, sui::object::id_address<OperatorCap>(&v0), arg2);
         sui::transfer::transfer<OperatorCap>(v0, arg3);
         let v1 = AddOperatorEvent{
-            operator_cap_id : sui::object::id<OperatorCap>(&v0), 
+            operator_cap_id : operator_cap_id, 
             recipient       : arg3, 
             roles           : arg2,
         };
@@ -196,12 +199,13 @@ module turbos_vault::config {
             id         : sui::object::new(arg1), 
             user_tiers : sui::table::new<address, Tier>(arg1),
         };
+        let user_tier_config_id = sui::object::id<UserTierConfig>(&v0);
         sui::transfer::public_share_object<UserTierConfig>(v0);
-        let v1 = InitUserTierConfigEvent{
+        let event = InitUserTierConfigEvent{
             admin_cap_id        : sui::object::id<AdminCap>(admin_cap), 
-            user_tier_config_id : sui::object::id<UserTierConfig>(&v0),
+            user_tier_config_id : user_tier_config_id,
         };
-        sui::event::emit<InitUserTierConfigEvent>(v1);
+        sui::event::emit<InitUserTierConfigEvent>(event);
     }
     
     public(friend) fun set_package_version(_: &AdminCap, arg1: &mut GlobalConfig, arg2: u64) {

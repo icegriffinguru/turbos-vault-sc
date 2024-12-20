@@ -1,6 +1,6 @@
 module turbos_vault::rewarder {
-    friend turbos_valut::vault;
-    
+    friend turbos_vault::vault;
+
     struct StrategyRewarderInfo has store {
         allocate_point: u64,
         acc_per_share: u128,
@@ -187,8 +187,9 @@ module turbos_vault::rewarder {
             rewarders       : sui::linked_table::new<std::type_name::TypeName, Rewarder>(arg0), 
             black_list      : std::vector::empty<address>(),
         };
+        let reward_manager_id = sui::object::id<RewarderManager>(&v0);
         sui::transfer::share_object<RewarderManager>(v0);
-        let v1 = InitRewarderManagerEvent{id: sui::object::id<RewarderManager>(&v0)};
+        let v1 = InitRewarderManagerEvent{id: reward_manager_id};
         sui::event::emit<InitRewarderManagerEvent>(v1);
     }
     

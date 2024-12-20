@@ -242,19 +242,19 @@ module turbos_vault::vault {
         sui::event::emit<AddRewardEvent>(v2);
     }
     
-    fun borrow_clmm_base_nft(
-        arg0: &Strategy,
-        arg1: sui::object::ID
-    ) : &turbos_clmm::position_nft::TurbosPositionNFT {
-        std::option::borrow<turbos_clmm::position_nft::TurbosPositionNFT>(&borrow_vault_account(arg0, arg1).clmm_base_nft)
-    }
+    // fun borrow_clmm_base_nft(
+    //     arg0: &Strategy,
+    //     arg1: sui::object::ID
+    // ) : &turbos_clmm::position_nft::TurbosPositionNFT {
+    //     std::option::borrow<turbos_clmm::position_nft::TurbosPositionNFT>(&borrow_vault_account(arg0, arg1).clmm_base_nft)
+    // }
     
-    fun borrow_clmm_limit_nft(
-        arg0: &Strategy,
-        arg1: sui::object::ID
-    ) : &turbos_clmm::position_nft::TurbosPositionNFT {
-        std::option::borrow<turbos_clmm::position_nft::TurbosPositionNFT>(&borrow_vault_account(arg0, arg1).clmm_limit_nft)
-    }
+    // fun borrow_clmm_limit_nft(
+    //     arg0: &Strategy,
+    //     arg1: sui::object::ID
+    // ) : &turbos_clmm::position_nft::TurbosPositionNFT {
+    //     std::option::borrow<turbos_clmm::position_nft::TurbosPositionNFT>(&borrow_vault_account(arg0, arg1).clmm_limit_nft)
+    // }
     
     fun borrow_mut_clmm_base_nft(
         arg0: &mut Strategy,
@@ -325,7 +325,7 @@ module turbos_vault::vault {
         arg3: u64,
         arg4: u64
     ) : u128 {
-        turbos_clmm::math_liquidity::get_liquidity_for_amounts(arg0, turbos_clmm::math_tick::sqrt_price_from_tick_index(arg1), turbos_clmm::math_tick::sqrt_price_from_tick_index(arg2), arg3 as u128, arg4 as u128)
+        turbos_clmm::math_liquidity::get_liquidity_for_amounts(arg0, turbos_clmm::math_tick::sqrt_price_from_tick_index(arg1), turbos_clmm::math_tick::sqrt_price_from_tick_index(arg2), (arg3 as u128), (arg4 as u128))
     }
     
     public fun calculate_position_share(
@@ -371,7 +371,7 @@ module turbos_vault::vault {
         arg1: &mut Strategy,
         arg2: sui::object::ID,
         arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
-        arg4: &mut sui::tx_context::TxContext
+        _: &mut sui::tx_context::TxContext
     ) : CheckRebalance {
         turbos_vault::config::checked_package_version(arg0);
         assert!(arg1.status == 0, 15);
@@ -476,7 +476,7 @@ module turbos_vault::vault {
         arg0: &turbos_vault::config::GlobalConfig,
         arg1: &mut Strategy,
         arg2: Vault,
-        arg3: &mut sui::tx_context::TxContext
+        _: &mut sui::tx_context::TxContext
     ) {
         turbos_vault::config::checked_package_version(arg0);
         assert!(arg1.status == 0, 15);
@@ -522,7 +522,9 @@ module turbos_vault::vault {
         arg6: &turbos_clmm::pool::Versioned,
         arg7: &mut sui::tx_context::TxContext
     ) {
+        let strategy_id = sui::object::id<Strategy>(arg1);
         let v0 = borrow_mut_clmm_base_nft(arg1, arg2);
+        let clmm_nft_id = sui::object::id<turbos_clmm::position_nft::TurbosPositionNFT>(v0);
         let (v1, v2) = turbos_clmm::position_manager::collect_with_return_<T0, T1, T2>(arg3, arg4, v0, 18446744073709551615, 18446744073709551615, sui::object::id_to_address(&arg2), sui::clock::timestamp_ms(arg5) + 60000, arg5, arg6, arg7);
         let v3 = v2;
         let v4 = v1;
@@ -532,19 +534,23 @@ module turbos_vault::vault {
         } else {
             let v8 = turbos_clmm::full_math_u64::mul_div_ceil(sui::coin::value<T0>(&v4), v5, 1000000);
             let v9 = turbos_clmm::full_math_u64::mul_div_ceil(sui::coin::value<T1>(&v3), v5, 1000000);
-            merge_protocol_asset<T0>(arg1, sui::coin::into_balance<T0>(sui::coin::split<T0>(&mut v4, v8, arg7)));
-            merge_protocol_asset<T1>(arg1, sui::coin::into_balance<T1>(sui::coin::split<T1>(&mut v3, v9, arg7)));
+            let balance_a = sui::coin::into_balance<T0>(sui::coin::split<T0>(&mut v4, v8, arg7));
+            let balance_b = sui::coin::into_balance<T1>(sui::coin::split<T1>(&mut v3, v9, arg7));
+            merge_protocol_asset<T0>(arg1, balance_a);
+            merge_protocol_asset<T1>(arg1, balance_b);
             (v8, v9)
         };
+        let amount_a = sui::coin::value<T0>(&v4);
+        let amount_b = sui::coin::value<T1>(&v3);
         merge_vault_balance<T0>(arg1, arg2, sui::coin::into_balance<T0>(v4));
         merge_vault_balance<T1>(arg1, arg2, sui::coin::into_balance<T1>(v3));
         let v10 = ClmmFeeClaimedEvent{
             vault_id          : arg2, 
-            strategy_id       : sui::object::id<Strategy>(arg1), 
+            strategy_id       : strategy_id, 
             clmm_pool_id      : sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg3), 
-            clmm_nft_id       : sui::object::id<turbos_clmm::position_nft::TurbosPositionNFT>(v0), 
-            amount_a          : sui::coin::value<T0>(&v4), 
-            amount_b          : sui::coin::value<T1>(&v3), 
+            clmm_nft_id       : clmm_nft_id, 
+            amount_a          : amount_a, 
+            amount_b          : amount_b, 
             performance_fee_a : v6, 
             performance_fee_b : v7, 
             coin_a_type_name  : std::type_name::get<T0>(), 
@@ -566,7 +572,9 @@ module turbos_vault::vault {
         arg9: &turbos_clmm::pool::Versioned,
         arg10: &mut sui::tx_context::TxContext
     ) : sui::coin::Coin<T3> {
+        let strategy_id = sui::object::id<Strategy>(arg1);
         let v0 = borrow_mut_clmm_base_nft(arg1, arg2);
+        let clmm_nft_id = sui::object::id<turbos_clmm::position_nft::TurbosPositionNFT>(v0);
         let v1 = turbos_clmm::position_manager::collect_reward_with_return_<T0, T1, T2, T3>(arg3, arg4, v0, arg5, arg6, 18446744073709551615, arg7, sui::clock::timestamp_ms(arg8) + 60000, arg8, arg9, arg10);
         let v2 = get_performance_fee_rate(arg0, arg1, arg2, arg10);
         let v3 = if (v2 == 0) {
@@ -578,9 +586,9 @@ module turbos_vault::vault {
         };
         let v5 = ClmmRewardClaimedEvent{
             vault_id         : arg2, 
-            strategy_id      : sui::object::id<Strategy>(arg1), 
+            strategy_id      : strategy_id, 
             clmm_pool_id     : sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg3), 
-            clmm_nft_id      : sui::object::id<turbos_clmm::position_nft::TurbosPositionNFT>(v0), 
+            clmm_nft_id      : clmm_nft_id, 
             amount           : sui::coin::value<T3>(&v1), 
             performance_fee  : v3, 
             reward_type_name : std::type_name::get<T3>(),
@@ -617,8 +625,8 @@ module turbos_vault::vault {
         arg6: &turbos_clmm::pool::Versioned,
         arg7: &mut sui::tx_context::TxContext
     ) {
-        let v0 = borrow_mut_clmm_limit_nft(arg1, arg2);
-        let (v1, v2) = turbos_clmm::position_manager::collect_with_return_<T0, T1, T2>(arg3, arg4, v0, 18446744073709551615, 18446744073709551615, sui::object::id_to_address(&arg2), sui::clock::timestamp_ms(arg5) + 60000, arg5, arg6, arg7);
+        let clmm_limit_nft_id = sui::object::id<turbos_clmm::position_nft::TurbosPositionNFT>(std::option::borrow<turbos_clmm::position_nft::TurbosPositionNFT>(&borrow_mut_vault_account(arg1, arg2).clmm_limit_nft));
+        let (v1, v2) = turbos_clmm::position_manager::collect_with_return_<T0, T1, T2>(arg3, arg4, borrow_mut_clmm_limit_nft(arg1, arg2), 18446744073709551615, 18446744073709551615, sui::object::id_to_address(&arg2), sui::clock::timestamp_ms(arg5) + 60000, arg5, arg6, arg7);
         let v3 = v2;
         let v4 = v1;
         let v5 = get_performance_fee_rate(arg0, arg1, arg2, arg7);
@@ -631,15 +639,17 @@ module turbos_vault::vault {
             merge_protocol_asset<T1>(arg1, sui::coin::into_balance<T1>(sui::coin::split<T1>(&mut v3, v9, arg7)));
             (v8, v9)
         };
+        let amount_a = sui::coin::value<T0>(&v4);
+        let amount_b = sui::coin::value<T1>(&v3);
         merge_vault_balance<T0>(arg1, arg2, sui::coin::into_balance<T0>(v4));
         merge_vault_balance<T1>(arg1, arg2, sui::coin::into_balance<T1>(v3));
         let v10 = ClmmFeeClaimedEvent{
             vault_id          : arg2, 
             strategy_id       : sui::object::id<Strategy>(arg1), 
             clmm_pool_id      : sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg3), 
-            clmm_nft_id       : sui::object::id<turbos_clmm::position_nft::TurbosPositionNFT>(v0), 
-            amount_a          : sui::coin::value<T0>(&v4), 
-            amount_b          : sui::coin::value<T1>(&v3), 
+            clmm_nft_id       : clmm_limit_nft_id, 
+            amount_a          : amount_a, 
+            amount_b          : amount_b, 
             performance_fee_a : v6, 
             performance_fee_b : v7, 
             coin_a_type_name  : std::type_name::get<T0>(), 
@@ -660,21 +670,25 @@ module turbos_vault::vault {
         arg9: &turbos_clmm::pool::Versioned,
         arg10: &mut sui::tx_context::TxContext
     ) : sui::coin::Coin<T3> {
-        let v0 = borrow_mut_clmm_limit_nft(arg1, arg2);
-        let v1 = turbos_clmm::position_manager::collect_reward_with_return_<T0, T1, T2, T3>(arg3, arg4, v0, arg5, arg6, 18446744073709551615, arg7, sui::clock::timestamp_ms(arg8) + 60000, arg8, arg9, arg10);
+        let strategy_id = sui::object::id<Strategy>(arg1);
+        let clmm_limit_nft = borrow_mut_clmm_limit_nft(arg1, arg2);
+        let clmm_limit_nft_id = sui::object::id<turbos_clmm::position_nft::TurbosPositionNFT>(clmm_limit_nft);
+        let v1 = turbos_clmm::position_manager::collect_reward_with_return_<T0, T1, T2, T3>(arg3, arg4, clmm_limit_nft, arg5, arg6, 18446744073709551615, arg7, sui::clock::timestamp_ms(arg8) + 60000, arg8, arg9, arg10);
+        let vault_id = arg2;
         let v2 = get_performance_fee_rate(arg0, arg1, arg2, arg10);
         let v3 = if (v2 == 0) {
             0
         } else {
             let v4 = turbos_clmm::full_math_u64::mul_div_ceil(sui::coin::value<T3>(&v1), v2, 1000000);
-            merge_protocol_asset<T3>(arg1, sui::coin::into_balance<T3>(sui::coin::split<T3>(&mut v1, v4, arg10)));
+            let balance = sui::coin::into_balance<T3>(sui::coin::split<T3>(&mut v1, v4, arg10));
+            merge_protocol_asset<T3>(arg1, balance);
             v4
         };
         let v5 = ClmmRewardClaimedEvent{
-            vault_id         : arg2, 
-            strategy_id      : sui::object::id<Strategy>(arg1), 
+            vault_id         : vault_id, 
+            strategy_id      : strategy_id, 
             clmm_pool_id     : sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg3), 
-            clmm_nft_id      : sui::object::id<turbos_clmm::position_nft::TurbosPositionNFT>(v0), 
+            clmm_nft_id      : clmm_limit_nft_id, 
             amount           : sui::coin::value<T3>(&v1), 
             performance_fee  : v3, 
             reward_type_name : std::type_name::get<T3>(),
@@ -751,7 +765,8 @@ module turbos_vault::vault {
         assert!(arg2.status == 0, 15);
         assert!(arg2.clmm_pool_id == sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg4), 17);
         turbos_vault::config::check_rebalance_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
-        merge_vault_balance<T3>(arg2, arg3, collect_clmm_reward<T0, T1, T2, T3>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+        let reward = collect_clmm_reward<T0, T1, T2, T3>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+        merge_vault_balance<T3>(arg2, arg3, reward);
     }
     
     public(friend) fun collect_protocol_fee<T0>(
@@ -809,7 +824,9 @@ module turbos_vault::vault {
         assert!(std::vector::contains<std::type_name::TypeName>(&arg2.rewarders, &v0), 16);
         let v1 = sui::object::id<Strategy>(arg2);
         let v2 = sui::object::id<Vault>(arg3);
-        update_vault_reward_info(arg2, v2, turbos_vault::rewarder::strategy_rewards_settle(arg1, arg2.rewarders, v1, arg4), borrow_vault_info(arg2, v2).share);
+        let srs = turbos_vault::rewarder::strategy_rewards_settle(arg1, arg2.rewarders, v1, arg4);
+        let bvi = borrow_vault_info(arg2, v2).share;
+        update_vault_reward_info(arg2, v2, srs, bvi);
         let v3 = update_vault_reward_info_on_claim(arg2, v2, v0);
         let v4 = VaultRewardClaimedEvent{
             vault_id         : v2, 
@@ -930,7 +947,9 @@ module turbos_vault::vault {
         let v10 = get_vault_base_last_tick_index(arg2, v0);
         if (is_clmm_base_nft_exists(arg2, v0)) {
             if (calculate_liquidity(v3, v4, v6, get_vault_balance<T0>(arg2, v0), get_vault_balance<T1>(arg2, v0)) > 0) {
-                let (v11, v12, v13, v14, v15) = increase_clmm_liquidity<T0, T1, T2>(arg2, v0, true, arg4, arg5, sui::coin::from_balance<T0>(take_vault_balance<T0>(arg2, v0), arg10), sui::coin::from_balance<T1>(take_vault_balance<T1>(arg2, v0), arg10), arg8, arg9, arg10);
+                let coin1 = sui::coin::from_balance<T0>(take_vault_balance<T0>(arg2, v0), arg10);
+                let coin2 = sui::coin::from_balance<T1>(take_vault_balance<T1>(arg2, v0), arg10);
+                let (v11, v12, v13, v14, v15) = increase_clmm_liquidity<T0, T1, T2>(arg2, v0, true, arg4, arg5, coin1, coin2, arg8, arg9, arg10);
                 v9 = v15;
                 v7 = v14;
                 v5 = v13;
@@ -959,7 +978,9 @@ module turbos_vault::vault {
         let v27 = get_vault_limit_liquidity(arg2, v0);
         if (is_clmm_limit_nft_exists(arg2, v0)) {
             if (calculate_liquidity(v3, v23, v25, get_vault_balance<T0>(arg2, v0), get_vault_balance<T1>(arg2, v0)) > 0) {
-                let (v28, v29, v30, v31, v32) = increase_clmm_liquidity<T0, T1, T2>(arg2, v0, false, arg4, arg5, sui::coin::from_balance<T0>(take_vault_balance<T0>(arg2, v0), arg10), sui::coin::from_balance<T1>(take_vault_balance<T1>(arg2, v0), arg10), arg8, arg9, arg10);
+                let coin1 = sui::coin::from_balance<T0>(take_vault_balance<T0>(arg2, v0), arg10);
+                let coin2 = sui::coin::from_balance<T1>(take_vault_balance<T1>(arg2, v0), arg10);
+                let (v28, v29, v30, v31, v32) = increase_clmm_liquidity<T0, T1, T2>(arg2, v0, false, arg4, arg5, coin1, coin2, arg8, arg9, arg10);
                 v27 = v32;
                 v26 = v31;
                 v24 = v30;
@@ -967,7 +988,9 @@ module turbos_vault::vault {
                 merge_vault_balance<T1>(arg2, v0, sui::coin::into_balance<T1>(v29));
             };
         };
-        update_vault_info_with_tick_range(arg2, v0, v8, v5, v7, v9, get_vault_limit_clmm_position_id(arg2, v0), v24, v26, v27, v3, v10, get_vault_limit_last_tick_index(arg2, v0));
+        let cpi = get_vault_limit_clmm_position_id(arg2, v0);
+        let lti = get_vault_limit_last_tick_index(arg2, v0);
+        update_vault_info_with_tick_range(arg2, v0, v8, v5, v7, v9, cpi, v24, v26, v27, v3, v10, lti);
         update_strategy_reward_info(arg1, arg2, v0, arg8);
         let v33 = DepositEvent{
             vault_id     : v0, 
@@ -1040,14 +1063,14 @@ module turbos_vault::vault {
     }
     
     // deprecated
-    public fun get_management_fee_rate(
-        arg0: &turbos_vault::config::GlobalConfig,
-        arg1: &Strategy,
-        arg2: sui::object::ID,
-        arg3: &mut sui::tx_context::TxContext
-    ) : u64 {
-        abort 0
-    }
+    // public fun get_management_fee_rate(
+    //     arg0: &turbos_vault::config::GlobalConfig,
+    //     arg1: &Strategy,
+    //     arg2: sui::object::ID,
+    //     arg3: &mut sui::tx_context::TxContext
+    // ) : u64 {
+    //     abort 0
+    // }
     
     public fun get_management_fee_rate_v2(
         arg0: &turbos_vault::config::GlobalConfig,
@@ -1072,10 +1095,10 @@ module turbos_vault::vault {
     }
     
     public fun get_performance_fee_rate(
-        arg0: &turbos_vault::config::GlobalConfig,
+        _: &turbos_vault::config::GlobalConfig,
         arg1: &Strategy,
         arg2: sui::object::ID,
-        arg3: &mut sui::tx_context::TxContext
+        _: &mut sui::tx_context::TxContext
     ) : u64 {
         let v0 = borrow_vault_info(arg1, arg2);
         if (!std::option::is_none<u64>(&v0.performance_fee_rate)) {
@@ -1124,7 +1147,14 @@ module turbos_vault::vault {
             v8 = v11;
             v9 = v10;
         };
-        (get_vault_balance<T0>(arg0, arg2), get_vault_balance<T1>(arg0, arg2), v5 as u64, v4 as u64, v9 as u64, v8 as u64)
+        (
+            get_vault_balance<T0>(arg0, arg2),
+            get_vault_balance<T1>(arg0, arg2),
+            (v5 as u64),
+            (v4 as u64),
+            (v9 as u64),
+            (v8 as u64)
+        )
     }
     
     public fun get_vault_balance<T0>(
@@ -1256,7 +1286,9 @@ module turbos_vault::vault {
         } else {
             borrow_mut_clmm_limit_nft(arg0, arg1)
         };
-        let (v1, v2) = turbos_clmm::position_manager::increase_liquidity_with_return_<T0, T1, T2>(arg3, arg4, coin_to_vec<T0>(arg5), coin_to_vec<T1>(arg6), v0, sui::coin::value<T0>(&arg5), sui::coin::value<T1>(&arg6), 0, 0, sui::clock::timestamp_ms(arg7) + 60000, arg7, arg8, arg9);
+        let coin_value1 = sui::coin::value<T0>(&arg5);
+        let coin_value2 = sui::coin::value<T1>(&arg6);
+        let (v1, v2) = turbos_clmm::position_manager::increase_liquidity_with_return_<T0, T1, T2>(arg3, arg4, coin_to_vec<T0>(arg5), coin_to_vec<T1>(arg6), v0, coin_value1, coin_value2 , 0, 0, sui::clock::timestamp_ms(arg7) + 60000, arg7, arg8, arg9);
         let (v3, v4, v5) = turbos_clmm::position_manager::get_position_info(arg4, sui::object::id_address<turbos_clmm::position_nft::TurbosPositionNFT>(v0));
         (v1, v2, v3, v4, v5)
     }
@@ -1339,7 +1371,26 @@ module turbos_vault::vault {
         arg7: &turbos_clmm::pool::Versioned,
         arg8: &mut sui::tx_context::TxContext
     ) : (turbos_clmm::position_nft::TurbosPositionNFT, sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
-        turbos_clmm::position_manager::mint_with_return_<T0, T1, T2>(arg0, arg1, coin_to_vec<T0>(arg2), coin_to_vec<T1>(arg3), turbos_clmm::i32::abs_u32(arg4), turbos_clmm::i32::is_neg(arg4), turbos_clmm::i32::abs_u32(arg5), turbos_clmm::i32::is_neg(arg5), sui::coin::value<T0>(&arg2), sui::coin::value<T1>(&arg3), 0, 0, sui::clock::timestamp_ms(arg6) + 60000, arg6, arg7, arg8)
+        let coin_value1 = sui::coin::value<T0>(&arg2);
+        let coin_value2 = sui::coin::value<T1>(&arg3);
+        turbos_clmm::position_manager::mint_with_return_<T0, T1, T2>(
+            arg0,
+            arg1,
+            coin_to_vec<T0>(arg2),
+            coin_to_vec<T1>(arg3),
+            turbos_clmm::i32::abs_u32(arg4),
+            turbos_clmm::i32::is_neg(arg4),
+            turbos_clmm::i32::abs_u32(arg5),
+            turbos_clmm::i32::is_neg(arg5),
+            coin_value1,
+            coin_value2,
+            0,
+            0,
+            sui::clock::timestamp_ms(arg6) + 60000,
+            arg6,
+            arg7,
+            arg8
+        )
     }
     
     public fun open_vault<T0, T1, T2>(
@@ -1512,7 +1563,9 @@ module turbos_vault::vault {
         if (is_clmm_base_nft_exists(arg3, arg4)) {
             if (arg6) {
                 if (calculate_liquidity(v6, v0, v2, get_vault_balance<T0>(arg3, arg4), get_vault_balance<T1>(arg3, arg4)) > 0) {
-                    let (v23, v24, v25, v26, v27) = increase_clmm_liquidity<T0, T1, T2>(arg3, arg4, true, arg15, arg16, sui::coin::from_balance<T0>(take_vault_balance<T0>(arg3, arg4), arg21), sui::coin::from_balance<T1>(take_vault_balance<T1>(arg3, arg4), arg21), arg19, arg20, arg21);
+                    let coin1 = sui::coin::from_balance<T0>(take_vault_balance<T0>(arg3, arg4), arg21);
+                    let coin2 = sui::coin::from_balance<T1>(take_vault_balance<T1>(arg3, arg4), arg21);
+                    let (v23, v24, v25, v26, v27) = increase_clmm_liquidity<T0, T1, T2>(arg3, arg4, true, arg15, arg16, coin1, coin2, arg19, arg20, arg21);
                     v11 = v27;
                     v3 = v26;
                     v1 = v25;
@@ -1783,7 +1836,13 @@ module turbos_vault::vault {
             };
         };
         let v12 = arg1.total_share - v10 + v1;
-        update_vault_reward_info(arg1, arg2, turbos_vault::rewarder::strategy_rewards_settle(arg0, arg1.rewarders, v2, arg3), v1);
+        let strategy_rewards_settle_result = turbos_vault::rewarder::strategy_rewards_settle(arg0, arg1.rewarders, v2, arg3);
+        update_vault_reward_info(
+            arg1,
+            arg2,
+            strategy_rewards_settle_result,
+            v1
+        );
         arg1.total_share = v12;
         turbos_vault::rewarder::set_strategy_share(arg0, v2, v12);
         v1
@@ -1814,18 +1873,18 @@ module turbos_vault::vault {
         arg4
     }
     
-    fun update_vault_info(
-        arg0: &mut Strategy,
-        arg1: sui::object::ID,
-        arg2: u128,
-        arg3: u128,
-        arg4: u128
-    ) {
-        let v0 = borrow_mut_vault_info(arg0, arg1);
-        v0.base_liquidity = arg2;
-        v0.limit_liquidity = arg3;
-        v0.sqrt_price = arg4;
-    }
+    // fun update_vault_info(
+    //     arg0: &mut Strategy,
+    //     arg1: sui::object::ID,
+    //     arg2: u128,
+    //     arg3: u128,
+    //     arg4: u128
+    // ) {
+    //     let v0 = borrow_mut_vault_info(arg0, arg1);
+    //     v0.base_liquidity = arg2;
+    //     v0.limit_liquidity = arg3;
+    //     v0.sqrt_price = arg4;
+    // }
     
     fun update_vault_info_with_tick_range(
         arg0: &mut Strategy,
@@ -1878,11 +1937,12 @@ module turbos_vault::vault {
     ) : u64 {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
+        let strategy_id = sui::object::id<Strategy>(arg2);
         let v0 = borrow_mut_vault_info(arg2, arg3);
         assert!(arg4 <= 1000000, 5);
         std::option::fill<u64>(&mut v0.management_fee_rate, arg4);
         let v1 = UpdateVaultManagementFeeRateEvent{
-            strategy_id : sui::object::id<Strategy>(arg2), 
+            strategy_id : strategy_id, 
             vault_id    : arg3, 
             old_rate    : std::option::get_with_default<u64>(&v0.management_fee_rate, 0), 
             new_rate    : arg4,
@@ -1900,11 +1960,12 @@ module turbos_vault::vault {
     ) : u64 {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
+        let strategy_id = sui::object::id<Strategy>(arg2);
         let v0 = borrow_mut_vault_info(arg2, arg3);
         assert!(arg4 <= 1000000, 5);
         std::option::fill<u64>(&mut v0.performance_fee_rate, arg4);
         let v1 = UpdateVaultPerformanceFeeRateEvent{
-            strategy_id : sui::object::id<Strategy>(arg2), 
+            strategy_id : strategy_id, 
             vault_id    : arg3, 
             old_rate    : std::option::get_with_default<u64>(&v0.performance_fee_rate, 0), 
             new_rate    : arg4,
@@ -1949,122 +2010,122 @@ module turbos_vault::vault {
         let v1 = v0.reward;
         v0.reward = 0;
         v0.reward_harvested = v0.reward_harvested + v1;
-        v1 as u64
+        (v1 as u64)
     }
     
     // deprecated
-    public fun vault_balance_amount<T0>(
-        arg0: &Strategy,
-        arg1: sui::object::ID
-    ) : u64 {
-        let v0 = get_type_name_str<T0>();
-        let v1 = borrow_vault_account(arg0, arg1);
-        if (sui::bag::contains<std::string::String>(&v1.balances, v0)) {
-            sui::balance::value<T0>(sui::bag::borrow<std::string::String, sui::balance::Balance<T0>>(&v1.balances, v0))
-        } else {
-            0
-        }
-    }
+    // public fun vault_balance_amount<T0>(
+    //     arg0: &Strategy,
+    //     arg1: sui::object::ID
+    // ) : u64 {
+    //     let v0 = get_type_name_str<T0>();
+    //     let v1 = borrow_vault_account(arg0, arg1);
+    //     if (sui::bag::contains<std::string::String>(&v1.balances, v0)) {
+    //         sui::balance::value<T0>(sui::bag::borrow<std::string::String, sui::balance::Balance<T0>>(&v1.balances, v0))
+    //     } else {
+    //         0
+    //     }
+    // }
     
     // deprecated
-    public fun withdraw<T0, T1, T2>(
-        arg0: &turbos_vault::config::GlobalConfig,
-        arg1: &mut turbos_vault::rewarder::RewarderManager,
-        arg2: &mut Strategy,
-        arg3: &mut Vault,
-        arg4: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
-        arg5: &mut turbos_clmm::position_manager::Positions,
-        arg6: u64,
-        arg7: bool,
-        arg8: &sui::clock::Clock,
-        arg9: &turbos_clmm::pool::Versioned,
-        arg10: &mut sui::tx_context::TxContext
-    ) : (sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
-        abort 0
-    }
+    // public fun withdraw<T0, T1, T2>(
+    //     arg0: &turbos_vault::config::GlobalConfig,
+    //     arg1: &mut turbos_vault::rewarder::RewarderManager,
+    //     arg2: &mut Strategy,
+    //     arg3: &mut Vault,
+    //     arg4: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+    //     arg5: &mut turbos_clmm::position_manager::Positions,
+    //     arg6: u64,
+    //     arg7: bool,
+    //     arg8: &sui::clock::Clock,
+    //     arg9: &turbos_clmm::pool::Versioned,
+    //     arg10: &mut sui::tx_context::TxContext
+    // ) : (sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
+    //     abort 0
+    // }
     
-    public fun withdraw_v2<T0, T1, T2>(
-        arg0: &turbos_vault::config::GlobalConfig,
-        arg1: &mut turbos_vault::config::UserTierConfig,
-        arg2: &mut turbos_vault::rewarder::RewarderManager,
-        arg3: &mut Strategy,
-        arg4: &mut Vault,
-        arg5: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
-        arg6: &mut turbos_clmm::position_manager::Positions,
-        arg7: u64,
-        arg8: bool,
-        arg9: &sui::clock::Clock,
-        arg10: &turbos_clmm::pool::Versioned,
-        arg11: &mut sui::tx_context::TxContext
-    ) : (sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
-        turbos_vault::config::checked_package_version(arg0);
-        assert!(arg3.status == 0, 15);
-        assert!(arg7 > 0 && arg7 <= 1000000, 2);
-        assert!(arg3.clmm_pool_id == sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg5), 17);
-        assert!(sui::object::id<Strategy>(arg3) == arg4.strategy_id, 18);
-        let v0 = sui::object::id<Vault>(arg4);
-        collect_clmm_fees<T0, T1, T2>(arg0, arg3, v0, arg5, arg6, arg9, arg10, arg11);
-        let v1 = sui::coin::zero<T0>(arg11);
-        let v2 = sui::coin::zero<T1>(arg11);
-        let v3 = 0;
-        if (is_clmm_base_nft_exists(arg3, v0)) {
-            let v4 = borrow_mut_clmm_base_nft(arg3, v0);
-            let (_, _, v7) = turbos_clmm::position_manager::get_position_info(arg6, sui::object::id_address<turbos_clmm::position_nft::TurbosPositionNFT>(v4));
-            if (v7 > 0) {
-                let (v8, v9) = decrease_clmm_liquidity<T0, T1, T2>(v4, arg5, arg6, turbos_clmm::full_math_u128::mul_div_floor(v7, (arg7 as u128), (1000000 as u128)), arg9, arg10, arg11);
-                let (_, _, v12) = turbos_clmm::position_manager::get_position_info(arg6, sui::object::id_address<turbos_clmm::position_nft::TurbosPositionNFT>(v4));
-                v3 = v12;
-                sui::coin::join<T0>(&mut v1, v8);
-                sui::coin::join<T1>(&mut v2, v9);
-            };
-        };
-        let v13 = 0;
-        if (is_clmm_limit_nft_exists(arg3, v0)) {
-            let v14 = borrow_mut_clmm_limit_nft(arg3, v0);
-            let (_, _, v17) = turbos_clmm::position_manager::get_position_info(arg6, sui::object::id_address<turbos_clmm::position_nft::TurbosPositionNFT>(v14));
-            if (v17 > 0) {
-                let (v18, v19) = decrease_clmm_liquidity<T0, T1, T2>(v14, arg5, arg6, turbos_clmm::full_math_u128::mul_div_floor(v17, (arg7 as u128), (1000000 as u128)), arg9, arg10, arg11);
-                let (_, _, v22) = turbos_clmm::position_manager::get_position_info(arg6, sui::object::id_address<turbos_clmm::position_nft::TurbosPositionNFT>(v14));
-                v13 = v22;
-                sui::coin::join<T0>(&mut v1, v18);
-                sui::coin::join<T1>(&mut v2, v19);
-            };
-        };
-        sui::coin::join<T0>(&mut v1, sui::coin::from_balance<T0>(take_vault_balance_by_amount<T0>(arg3, v0, turbos_clmm::full_math_u64::mul_div_floor(vault_balance_amount<T0>(arg3, v0), arg7, 1000000)), arg11));
-        sui::coin::join<T1>(&mut v2, sui::coin::from_balance<T1>(take_vault_balance_by_amount<T1>(arg3, v0, turbos_clmm::full_math_u64::mul_div_floor(vault_balance_amount<T1>(arg3, v0), arg7, 1000000)), arg11));
-        let v23 = get_management_fee_rate_v2(arg0, arg1, arg3, v0, arg11);
-        let (v24, v25) = if (v23 == 0) {
-            (0, 0)
-        } else {
-            let v26 = turbos_clmm::full_math_u64::mul_div_ceil(sui::coin::value<T0>(&v1), v23, 1000000);
-            let v27 = turbos_clmm::full_math_u64::mul_div_ceil(sui::coin::value<T1>(&v2), v23, 1000000);
-            merge_protocol_asset<T0>(arg3, sui::coin::into_balance<T0>(sui::coin::split<T0>(&mut v1, v26, arg11)));
-            merge_protocol_asset<T1>(arg3, sui::coin::into_balance<T1>(sui::coin::split<T1>(&mut v2, v27, arg11)));
-            (v26, v27)
-        };
-        if (arg8 && arg7 == 1000000) {
-            if (v24) {
-                burn_clmm_base_nft<T0, T1, T2>(arg3, v0, arg6, arg10, arg11);
-            };
-            if (v25) {
-                burn_clmm_limit_nft<T0, T1, T2>(arg3, v0, arg6, arg10, arg11);
-            };
-        };
-        update_vault_info(arg3, v0, v3, v13, turbos_clmm::pool::get_pool_sqrt_price<T0, T1, T2>(arg5));
-        update_strategy_reward_info(arg2, arg3, v0, arg9);
-        borrow_vault_info(arg3, v0);
-        let v28 = WithdrawEvent{
-            vault_id              : v0, 
-            strategy_id           : sui::object::id<Strategy>(arg3), 
-            clmm_pool_id          : sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg5), 
-            percentage            : arg7, 
-            burn_clmm_nft         : arg8, 
-            amount_a              : sui::coin::value<T0>(&v1), 
-            amount_b              : sui::coin::value<T1>(&v2), 
-            protocol_fee_a_amount : v24, 
-            protocol_fee_b_amount : v25,
-        };
-        sui::event::emit<WithdrawEvent>(v28);
-        (v1, v2)
-    }
+    // public fun withdraw_v2<T0, T1, T2>(
+    //     arg0: &turbos_vault::config::GlobalConfig,
+    //     arg1: &mut turbos_vault::config::UserTierConfig,
+    //     arg2: &mut turbos_vault::rewarder::RewarderManager,
+    //     arg3: &mut Strategy,
+    //     arg4: &mut Vault,
+    //     arg5: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+    //     arg6: &mut turbos_clmm::position_manager::Positions,
+    //     arg7: u64,
+    //     arg8: bool,
+    //     arg9: &sui::clock::Clock,
+    //     arg10: &turbos_clmm::pool::Versioned,
+    //     arg11: &mut sui::tx_context::TxContext
+    // ) : (sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
+    //     turbos_vault::config::checked_package_version(arg0);
+    //     assert!(arg3.status == 0, 15);
+    //     assert!(arg7 > 0 && arg7 <= 1000000, 2);
+    //     assert!(arg3.clmm_pool_id == sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg5), 17);
+    //     assert!(sui::object::id<Strategy>(arg3) == arg4.strategy_id, 18);
+    //     let v0 = sui::object::id<Vault>(arg4);
+    //     collect_clmm_fees<T0, T1, T2>(arg0, arg3, v0, arg5, arg6, arg9, arg10, arg11);
+    //     let v1 = sui::coin::zero<T0>(arg11);
+    //     let v2 = sui::coin::zero<T1>(arg11);
+    //     let v3 = 0;
+    //     if (is_clmm_base_nft_exists(arg3, v0)) {
+    //         let v4 = borrow_mut_clmm_base_nft(arg3, v0);
+    //         let (_, _, v7) = turbos_clmm::position_manager::get_position_info(arg6, sui::object::id_address<turbos_clmm::position_nft::TurbosPositionNFT>(v4));
+    //         if (v7 > 0) {
+    //             let (v8, v9) = decrease_clmm_liquidity<T0, T1, T2>(v4, arg5, arg6, turbos_clmm::full_math_u128::mul_div_floor(v7, (arg7 as u128), (1000000 as u128)), arg9, arg10, arg11);
+    //             let (_, _, v12) = turbos_clmm::position_manager::get_position_info(arg6, sui::object::id_address<turbos_clmm::position_nft::TurbosPositionNFT>(v4));
+    //             v3 = v12;
+    //             sui::coin::join<T0>(&mut v1, v8);
+    //             sui::coin::join<T1>(&mut v2, v9);
+    //         };
+    //     };
+    //     let v13 = 0;
+    //     if (is_clmm_limit_nft_exists(arg3, v0)) {
+    //         let v14 = borrow_mut_clmm_limit_nft(arg3, v0);
+    //         let (_, _, v17) = turbos_clmm::position_manager::get_position_info(arg6, sui::object::id_address<turbos_clmm::position_nft::TurbosPositionNFT>(v14));
+    //         if (v17 > 0) {
+    //             let (v18, v19) = decrease_clmm_liquidity<T0, T1, T2>(v14, arg5, arg6, turbos_clmm::full_math_u128::mul_div_floor(v17, (arg7 as u128), (1000000 as u128)), arg9, arg10, arg11);
+    //             let (_, _, v22) = turbos_clmm::position_manager::get_position_info(arg6, sui::object::id_address<turbos_clmm::position_nft::TurbosPositionNFT>(v14));
+    //             v13 = v22;
+    //             sui::coin::join<T0>(&mut v1, v18);
+    //             sui::coin::join<T1>(&mut v2, v19);
+    //         };
+    //     };
+    //     sui::coin::join<T0>(&mut v1, sui::coin::from_balance<T0>(take_vault_balance_by_amount<T0>(arg3, v0, turbos_clmm::full_math_u64::mul_div_floor(vault_balance_amount<T0>(arg3, v0), arg7, 1000000)), arg11));
+    //     sui::coin::join<T1>(&mut v2, sui::coin::from_balance<T1>(take_vault_balance_by_amount<T1>(arg3, v0, turbos_clmm::full_math_u64::mul_div_floor(vault_balance_amount<T1>(arg3, v0), arg7, 1000000)), arg11));
+    //     let v23 = get_management_fee_rate_v2(arg0, arg1, arg3, v0, arg11);
+    //     let (v24, v25) = if (v23 == 0) {
+    //         (0, 0)
+    //     } else {
+    //         let v26 = turbos_clmm::full_math_u64::mul_div_ceil(sui::coin::value<T0>(&v1), v23, 1000000);
+    //         let v27 = turbos_clmm::full_math_u64::mul_div_ceil(sui::coin::value<T1>(&v2), v23, 1000000);
+    //         merge_protocol_asset<T0>(arg3, sui::coin::into_balance<T0>(sui::coin::split<T0>(&mut v1, v26, arg11)));
+    //         merge_protocol_asset<T1>(arg3, sui::coin::into_balance<T1>(sui::coin::split<T1>(&mut v2, v27, arg11)));
+    //         (v26, v27)
+    //     };
+    //     if (arg8 && arg7 == 1000000) {
+    //         if (v24) {
+    //             burn_clmm_base_nft<T0, T1, T2>(arg3, v0, arg6, arg10, arg11);
+    //         };
+    //         if (v25) {
+    //             burn_clmm_limit_nft<T0, T1, T2>(arg3, v0, arg6, arg10, arg11);
+    //         };
+    //     };
+    //     update_vault_info(arg3, v0, v3, v13, turbos_clmm::pool::get_pool_sqrt_price<T0, T1, T2>(arg5));
+    //     update_strategy_reward_info(arg2, arg3, v0, arg9);
+    //     borrow_vault_info(arg3, v0);
+    //     let v28 = WithdrawEvent{
+    //         vault_id              : v0, 
+    //         strategy_id           : sui::object::id<Strategy>(arg3), 
+    //         clmm_pool_id          : sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg5), 
+    //         percentage            : arg7, 
+    //         burn_clmm_nft         : arg8, 
+    //         amount_a              : sui::coin::value<T0>(&v1), 
+    //         amount_b              : sui::coin::value<T1>(&v2), 
+    //         protocol_fee_a_amount : v24, 
+    //         protocol_fee_b_amount : v25,
+    //     };
+    //     sui::event::emit<WithdrawEvent>(v28);
+    //     (v1, v2)
+    // }
 }
