@@ -214,7 +214,14 @@ module turbos_vault::vault {
         coin_b_type_name: std::type_name::TypeName,
     }
     
-    public fun add_rewarder<T0>(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut turbos_vault::rewarder::RewarderManager, arg3: &mut Strategy, arg4: u64, arg5: &sui::clock::Clock) {
+    public fun add_rewarder<T0>(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut turbos_vault::rewarder::RewarderManager,
+        arg3: &mut Strategy,
+        arg4: u64,
+        arg5: &sui::clock::Clock
+    ) {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         let v0 = std::type_name::get<T0>();
@@ -231,51 +238,100 @@ module turbos_vault::vault {
         sui::event::emit<AddRewardEvent>(v2);
     }
     
-    fun borrow_clmm_base_nft(arg0: &Strategy, arg1: sui::object::ID) : &turbos_clmm::position_nft::TurbosPositionNFT {
+    fun borrow_clmm_base_nft(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : &turbos_clmm::position_nft::TurbosPositionNFT {
         std::option::borrow<turbos_clmm::position_nft::TurbosPositionNFT>(&borrow_vault_account(arg0, arg1).clmm_base_nft)
     }
     
-    fun borrow_clmm_limit_nft(arg0: &Strategy, arg1: sui::object::ID) : &turbos_clmm::position_nft::TurbosPositionNFT {
+    fun borrow_clmm_limit_nft(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : &turbos_clmm::position_nft::TurbosPositionNFT {
         std::option::borrow<turbos_clmm::position_nft::TurbosPositionNFT>(&borrow_vault_account(arg0, arg1).clmm_limit_nft)
     }
     
-    fun borrow_mut_clmm_base_nft(arg0: &mut Strategy, arg1: sui::object::ID) : &mut turbos_clmm::position_nft::TurbosPositionNFT {
+    fun borrow_mut_clmm_base_nft(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID
+    ) : &mut turbos_clmm::position_nft::TurbosPositionNFT {
         std::option::borrow_mut<turbos_clmm::position_nft::TurbosPositionNFT>(&mut borrow_mut_vault_account(arg0, arg1).clmm_base_nft)
     }
     
-    fun borrow_mut_clmm_limit_nft(arg0: &mut Strategy, arg1: sui::object::ID) : &mut turbos_clmm::position_nft::TurbosPositionNFT {
+    fun borrow_mut_clmm_limit_nft(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID
+    ) : &mut turbos_clmm::position_nft::TurbosPositionNFT {
         std::option::borrow_mut<turbos_clmm::position_nft::TurbosPositionNFT>(&mut borrow_mut_vault_account(arg0, arg1).clmm_limit_nft)
     }
     
-    fun borrow_mut_vault_account(arg0: &mut Strategy, arg1: sui::object::ID) : &mut Account {
+    fun borrow_mut_vault_account(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID
+    ) : &mut Account {
         sui::table::borrow_mut<sui::object::ID, Account>(&mut arg0.accounts, arg1)
     }
     
-    fun borrow_mut_vault_info(arg0: &mut Strategy, arg1: sui::object::ID) : &mut VaultInfo {
+    fun borrow_mut_vault_info(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID
+    ) : &mut VaultInfo {
         sui::linked_table::borrow_mut<sui::object::ID, VaultInfo>(&mut arg0.vaults, arg1)
     }
     
-    public fun borrow_vault_account(arg0: &Strategy, arg1: sui::object::ID) : &Account {
+    public fun borrow_vault_account(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : &Account {
         sui::table::borrow<sui::object::ID, Account>(&arg0.accounts, arg1)
     }
     
-    public fun borrow_vault_info(arg0: &Strategy, arg1: sui::object::ID) : &VaultInfo {
+    public fun borrow_vault_info(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : &VaultInfo {
         sui::linked_table::borrow<sui::object::ID, VaultInfo>(&arg0.vaults, arg1)
     }
     
-    fun burn_clmm_base_nft<T0, T1, T2>(arg0: &mut Strategy, arg1: sui::object::ID, arg2: &mut turbos_clmm::position_manager::Positions, arg3: &turbos_clmm::pool::Versioned, arg4: &mut sui::tx_context::TxContext) {
+    fun burn_clmm_base_nft<T0, T1, T2>(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID,
+        arg2: &mut turbos_clmm::position_manager::Positions,
+        arg3: &turbos_clmm::pool::Versioned,
+        arg4: &mut sui::tx_context::TxContext
+    ) {
         turbos_clmm::position_manager::burn<T0, T1, T2>(arg2, extract_clmm_base_nft(arg0, arg1), arg3, arg4);
     }
     
-    fun burn_clmm_limit_nft<T0, T1, T2>(arg0: &mut Strategy, arg1: sui::object::ID, arg2: &mut turbos_clmm::position_manager::Positions, arg3: &turbos_clmm::pool::Versioned, arg4: &mut sui::tx_context::TxContext) {
+    fun burn_clmm_limit_nft<T0, T1, T2>(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID,
+        arg2: &mut turbos_clmm::position_manager::Positions,
+        arg3: &turbos_clmm::pool::Versioned,
+        arg4: &mut sui::tx_context::TxContext
+    ) {
         turbos_clmm::position_manager::burn<T0, T1, T2>(arg2, extract_clmm_limit_nft(arg0, arg1), arg3, arg4);
     }
     
-    fun calculate_liquidity(arg0: u128, arg1: turbos_clmm::i32::I32, arg2: turbos_clmm::i32::I32, arg3: u64, arg4: u64) : u128 {
+    fun calculate_liquidity(
+        arg0: u128,
+        arg1: turbos_clmm::i32::I32,
+        arg2: turbos_clmm::i32::I32,
+        arg3: u64,
+        arg4: u64
+    ) : u128 {
         turbos_clmm::math_liquidity::get_liquidity_for_amounts(arg0, turbos_clmm::math_tick::sqrt_price_from_tick_index(arg1), turbos_clmm::math_tick::sqrt_price_from_tick_index(arg2), arg3 as u128, arg4 as u128)
     }
     
-    public fun calculate_position_share(arg0: turbos_clmm::i32::I32, arg1: turbos_clmm::i32::I32, arg2: u128, arg3: u128, arg4: turbos_clmm::i32::I32, arg5: turbos_clmm::i32::I32) : u128 {
+    public fun calculate_position_share(
+        arg0: turbos_clmm::i32::I32,
+        arg1: turbos_clmm::i32::I32,
+        arg2: u128,
+        arg3: u128,
+        arg4: turbos_clmm::i32::I32,
+        arg5: turbos_clmm::i32::I32
+    ) : u128 {
         assert!(turbos_clmm::i32::lt(arg0, arg1), 4);
         assert!(turbos_clmm::i32::lt(arg4, arg5), 4);
         let v0 = (turbos_clmm::i32::lte(arg1, arg4) || turbos_clmm::i32::gte(arg0, arg5)) && false || true;
@@ -296,13 +352,23 @@ module turbos_vault::vault {
         (((v3 as u256) * (arg3 as u256) * (arg3 as u256) * 1000000000 / 340282366920938463463374607431768211455 / 1000000000) as u128) + v4
     }
     
-    public fun calculate_tick_index(arg0: turbos_clmm::i32::I32, arg1: u32, arg2: u32) : (turbos_clmm::i32::I32, turbos_clmm::i32::I32) {
+    public fun calculate_tick_index(
+        arg0: turbos_clmm::i32::I32,
+        arg1: u32,
+        arg2: u32
+    ) : (turbos_clmm::i32::I32, turbos_clmm::i32::I32) {
         let v0 = turbos_clmm::i32::sub(arg0, turbos_clmm::i32::mod(arg0, turbos_clmm::i32::from_u32(arg1)));
         let v1 = turbos_clmm::i32::from_u32(arg2 + 1);
         (turbos_clmm::i32::sub(v0, turbos_clmm::i32::mul(turbos_clmm::i32::from_u32(arg1), v1)), turbos_clmm::i32::add(v0, turbos_clmm::i32::mul(turbos_clmm::i32::from_u32(arg1), v1)))
     }
     
-    public fun check_rebalance<T0, T1, T2>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut Strategy, arg2: sui::object::ID, arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg4: &mut sui::tx_context::TxContext) : CheckRebalance {
+    public fun check_rebalance<T0, T1, T2>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut Strategy,
+        arg2: sui::object::ID,
+        arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg4: &mut sui::tx_context::TxContext
+    ) : CheckRebalance {
         turbos_vault::config::checked_package_version(arg0);
         assert!(arg1.status == 0, 15);
         assert!(arg1.clmm_pool_id == sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg3), 17);
@@ -360,7 +426,13 @@ module turbos_vault::vault {
         }
     }
     
-    public fun check_rebalance_loop<T0, T1, T2>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut Strategy, arg2: sui::object::ID, arg3: u64, arg4: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg5: &mut sui::tx_context::TxContext) : (vector<CheckRebalance>, std::option::Option<sui::object::ID>) {
+    public fun check_rebalance_loop<T0, T1, T2>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut Strategy, arg2: sui::object::ID,
+        arg3: u64,
+        arg4: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg5: &mut sui::tx_context::TxContext
+    ) : (vector<CheckRebalance>, std::option::Option<sui::object::ID>) {
         turbos_vault::config::checked_package_version(arg0);
         assert!(arg1.status == 0, 15);
         assert!(arg3 > 0, 19);
@@ -382,7 +454,13 @@ module turbos_vault::vault {
         (v0, *v3)
     }
     
-    fun check_tick_range(arg0: u32, arg1: turbos_clmm::i32::I32, arg2: turbos_clmm::i32::I32, arg3: turbos_clmm::i32::I32, arg4: u32) {
+    fun check_tick_range(
+        arg0: u32,
+        arg1: turbos_clmm::i32::I32,
+        arg2: turbos_clmm::i32::I32,
+        arg3: turbos_clmm::i32::I32,
+        arg4: u32
+    ) {
         turbos_clmm::i32::from_u32(arg4);
         assert!(turbos_clmm::i32::lt(arg2, arg1) && turbos_clmm::i32::lt(arg1, arg3), 4);
         let (v0, v1) = calculate_tick_index(arg1, arg4, arg0 - 1);
@@ -390,7 +468,12 @@ module turbos_vault::vault {
         assert!(turbos_clmm::i32::gte(arg3, v1), 14);
     }
     
-    public fun close_vault<T0, T1>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut Strategy, arg2: Vault, arg3: &mut sui::tx_context::TxContext) {
+    public fun close_vault<T0, T1>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut Strategy,
+        arg2: Vault,
+        arg3: &mut sui::tx_context::TxContext
+    ) {
         turbos_vault::config::checked_package_version(arg0);
         assert!(arg1.status == 0, 15);
         assert!(sui::object::id<Strategy>(arg1) == arg2.strategy_id, 18);
@@ -425,7 +508,16 @@ module turbos_vault::vault {
         v0
     }
     
-    fun collect_clmm_base_fees<T0, T1, T2>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut Strategy, arg2: sui::object::ID, arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg4: &mut turbos_clmm::position_manager::Positions, arg5: &sui::clock::Clock, arg6: &turbos_clmm::pool::Versioned, arg7: &mut sui::tx_context::TxContext) {
+    fun collect_clmm_base_fees<T0, T1, T2>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut Strategy,
+        arg2: sui::object::ID,
+        arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg4: &mut turbos_clmm::position_manager::Positions,
+        arg5: &sui::clock::Clock,
+        arg6: &turbos_clmm::pool::Versioned,
+        arg7: &mut sui::tx_context::TxContext
+    ) {
         let v0 = borrow_mut_clmm_base_nft(arg1, arg2);
         let (v1, v2) = turbos_clmm::position_manager::collect_with_return_<T0, T1, T2>(arg3, arg4, v0, 18446744073709551615, 18446744073709551615, sui::object::id_to_address(&arg2), sui::clock::timestamp_ms(arg5) + 60000, arg5, arg6, arg7);
         let v3 = v2;
@@ -457,7 +549,19 @@ module turbos_vault::vault {
         sui::event::emit<ClmmFeeClaimedEvent>(v10);
     }
     
-    fun collect_clmm_base_reward<T0, T1, T2, T3>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut Strategy, arg2: sui::object::ID, arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg4: &mut turbos_clmm::position_manager::Positions, arg5: &mut turbos_clmm::pool::PoolRewardVault<T3>, arg6: u64, arg7: address, arg8: &sui::clock::Clock, arg9: &turbos_clmm::pool::Versioned, arg10: &mut sui::tx_context::TxContext) : sui::coin::Coin<T3> {
+    fun collect_clmm_base_reward<T0, T1, T2, T3>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut Strategy,
+        arg2: sui::object::ID,
+        arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg4: &mut turbos_clmm::position_manager::Positions,
+        arg5: &mut turbos_clmm::pool::PoolRewardVault<T3>,
+        arg6: u64,
+        arg7: address,
+        arg8: &sui::clock::Clock,
+        arg9: &turbos_clmm::pool::Versioned,
+        arg10: &mut sui::tx_context::TxContext
+    ) : sui::coin::Coin<T3> {
         let v0 = borrow_mut_clmm_base_nft(arg1, arg2);
         let v1 = turbos_clmm::position_manager::collect_reward_with_return_<T0, T1, T2, T3>(arg3, arg4, v0, arg5, arg6, 18446744073709551615, arg7, sui::clock::timestamp_ms(arg8) + 60000, arg8, arg9, arg10);
         let v2 = get_performance_fee_rate(arg0, arg1, arg2, arg10);
@@ -481,7 +585,16 @@ module turbos_vault::vault {
         v1
     }
     
-    fun collect_clmm_fees<T0, T1, T2>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut Strategy, arg2: sui::object::ID, arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg4: &mut turbos_clmm::position_manager::Positions, arg5: &sui::clock::Clock, arg6: &turbos_clmm::pool::Versioned, arg7: &mut sui::tx_context::TxContext) {
+    fun collect_clmm_fees<T0, T1, T2>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut Strategy,
+        arg2: sui::object::ID,
+        arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg4: &mut turbos_clmm::position_manager::Positions,
+        arg5: &sui::clock::Clock,
+        arg6: &turbos_clmm::pool::Versioned,
+        arg7: &mut sui::tx_context::TxContext
+    ) {
         if (is_clmm_base_nft_exists(arg1, arg2)) {
             collect_clmm_base_fees<T0, T1, T2>(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
         };
@@ -490,7 +603,16 @@ module turbos_vault::vault {
         };
     }
     
-    fun collect_clmm_limit_fees<T0, T1, T2>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut Strategy, arg2: sui::object::ID, arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg4: &mut turbos_clmm::position_manager::Positions, arg5: &sui::clock::Clock, arg6: &turbos_clmm::pool::Versioned, arg7: &mut sui::tx_context::TxContext) {
+    fun collect_clmm_limit_fees<T0, T1, T2>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut Strategy,
+        arg2: sui::object::ID,
+        arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg4: &mut turbos_clmm::position_manager::Positions,
+        arg5: &sui::clock::Clock,
+        arg6: &turbos_clmm::pool::Versioned,
+        arg7: &mut sui::tx_context::TxContext
+    ) {
         let v0 = borrow_mut_clmm_limit_nft(arg1, arg2);
         let (v1, v2) = turbos_clmm::position_manager::collect_with_return_<T0, T1, T2>(arg3, arg4, v0, 18446744073709551615, 18446744073709551615, sui::object::id_to_address(&arg2), sui::clock::timestamp_ms(arg5) + 60000, arg5, arg6, arg7);
         let v3 = v2;
@@ -522,7 +644,18 @@ module turbos_vault::vault {
         sui::event::emit<ClmmFeeClaimedEvent>(v10);
     }
     
-    fun collect_clmm_limit_reward<T0, T1, T2, T3>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut Strategy, arg2: sui::object::ID, arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg4: &mut turbos_clmm::position_manager::Positions, arg5: &mut turbos_clmm::pool::PoolRewardVault<T3>, arg6: u64, arg7: address, arg8: &sui::clock::Clock, arg9: &turbos_clmm::pool::Versioned, arg10: &mut sui::tx_context::TxContext) : sui::coin::Coin<T3> {
+    fun collect_clmm_limit_reward<T0, T1, T2, T3>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut Strategy,
+        arg2: sui::object::ID,
+        arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg4: &mut turbos_clmm::position_manager::Positions,
+        arg5: &mut turbos_clmm::pool::PoolRewardVault<T3>,
+        arg6: u64, arg7: address,
+        arg8: &sui::clock::Clock,
+        arg9: &turbos_clmm::pool::Versioned,
+        arg10: &mut sui::tx_context::TxContext
+    ) : sui::coin::Coin<T3> {
         let v0 = borrow_mut_clmm_limit_nft(arg1, arg2);
         let v1 = turbos_clmm::position_manager::collect_reward_with_return_<T0, T1, T2, T3>(arg3, arg4, v0, arg5, arg6, 18446744073709551615, arg7, sui::clock::timestamp_ms(arg8) + 60000, arg8, arg9, arg10);
         let v2 = get_performance_fee_rate(arg0, arg1, arg2, arg10);
@@ -546,7 +679,17 @@ module turbos_vault::vault {
         v1
     }
     
-    fun collect_clmm_reward<T0, T1, T2, T3>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut Strategy, arg2: sui::object::ID, arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg4: &mut turbos_clmm::position_manager::Positions, arg5: &mut turbos_clmm::pool::PoolRewardVault<T3>, arg6: u64, arg7: address, arg8: &sui::clock::Clock, arg9: &turbos_clmm::pool::Versioned, arg10: &mut sui::tx_context::TxContext) : sui::balance::Balance<T3> {
+    fun collect_clmm_reward<T0, T1, T2, T3>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut Strategy, arg2: sui::object::ID,
+        arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg4: &mut turbos_clmm::position_manager::Positions,
+        arg5: &mut turbos_clmm::pool::PoolRewardVault<T3>,
+        arg6: u64, arg7: address,
+        arg8: &sui::clock::Clock,
+        arg9: &turbos_clmm::pool::Versioned,
+        arg10: &mut sui::tx_context::TxContext
+    ) : sui::balance::Balance<T3> {
         let v0 = sui::balance::zero<T3>();
         if (is_clmm_base_nft_exists(arg1, arg2)) {
             sui::balance::join<T3>(&mut v0, sui::coin::into_balance<T3>(collect_clmm_base_reward<T0, T1, T2, T3>(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)));
@@ -557,7 +700,19 @@ module turbos_vault::vault {
         v0
     }
     
-    public fun collect_clmm_reward_direct_return<T0, T1, T2, T3>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut Strategy, arg2: &Vault, arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg4: &mut turbos_clmm::position_manager::Positions, arg5: &mut turbos_clmm::pool::PoolRewardVault<T3>, arg6: u64, arg7: address, arg8: &sui::clock::Clock, arg9: &turbos_clmm::pool::Versioned, arg10: &mut sui::tx_context::TxContext) : sui::coin::Coin<T3> {
+    public fun collect_clmm_reward_direct_return<T0, T1, T2, T3>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut Strategy,
+        arg2: &Vault,
+        arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg4: &mut turbos_clmm::position_manager::Positions,
+        arg5: &mut turbos_clmm::pool::PoolRewardVault<T3>,
+        arg6: u64,
+        arg7: address,
+        arg8: &sui::clock::Clock,
+        arg9: &turbos_clmm::pool::Versioned,
+        arg10: &mut sui::tx_context::TxContext
+    ) : sui::coin::Coin<T3> {
         turbos_vault::config::checked_package_version(arg0);
         assert!(arg1.status == 0, 15);
         assert!(arg1.clmm_pool_id == sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg3), 17);
@@ -574,7 +729,20 @@ module turbos_vault::vault {
         sui::coin::from_balance<T3>(v1, arg10)
     }
     
-    public fun collect_clmm_reward_to_vault<T0, T1, T2, T3>(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: sui::object::ID, arg4: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg5: &mut turbos_clmm::position_manager::Positions, arg6: &mut turbos_clmm::pool::PoolRewardVault<T3>, arg7: u64, arg8: address, arg9: &sui::clock::Clock, arg10: &turbos_clmm::pool::Versioned, arg11: &mut sui::tx_context::TxContext) {
+    public fun collect_clmm_reward_to_vault<T0, T1, T2, T3>(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut Strategy,
+        arg3: sui::object::ID,
+        arg4: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg5: &mut turbos_clmm::position_manager::Positions,
+        arg6: &mut turbos_clmm::pool::PoolRewardVault<T3>,
+        arg7: u64,
+        arg8: address,
+        arg9: &sui::clock::Clock,
+        arg10: &turbos_clmm::pool::Versioned,
+        arg11: &mut sui::tx_context::TxContext
+    ) {
         turbos_vault::config::checked_package_version(arg1);
         assert!(arg2.status == 0, 15);
         assert!(arg2.clmm_pool_id == sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg4), 17);
@@ -582,14 +750,27 @@ module turbos_vault::vault {
         merge_vault_balance<T3>(arg2, arg3, collect_clmm_reward<T0, T1, T2, T3>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
     }
     
-    public(friend) fun collect_protocol_fee<T0>(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: u64, arg4: &mut sui::tx_context::TxContext) : sui::coin::Coin<T0> {
+    public(friend) fun collect_protocol_fee<T0>(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut Strategy,
+        arg3: u64,
+        arg4: &mut sui::tx_context::TxContext
+    ) : sui::coin::Coin<T0> {
         turbos_vault::config::checked_package_version(arg1);
         assert!(arg2.status == 0, 15);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         sui::coin::from_balance<T0>(take_protocol_asset_by_amount<T0>(arg2, arg3), arg4)
     }
     
-    fun collect_rebalance_fee<T0, T1>(arg0: &mut Strategy, arg1: sui::object::ID, arg2: u64, arg3: u64, arg4: &mut sui::balance::Balance<T0>, arg5: &mut sui::balance::Balance<T1>) {
+    fun collect_rebalance_fee<T0, T1>(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID,
+        arg2: u64,
+        arg3: u64,
+        arg4: &mut sui::balance::Balance<T0>,
+        arg5: &mut sui::balance::Balance<T1>
+    ) {
         let v0 = arg2 - sui::balance::value<T0>(arg4);
         let v1 = arg3 - sui::balance::value<T1>(arg5);
         if (v0 > 0) {
@@ -609,7 +790,14 @@ module turbos_vault::vault {
         sui::event::emit<CollectRebalanceFeeEvent>(v2);
     }
     
-    public fun collect_reward<T0>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut turbos_vault::rewarder::RewarderManager, arg2: &mut Strategy, arg3: &Vault, arg4: &sui::clock::Clock, arg5: &mut sui::tx_context::TxContext) : sui::coin::Coin<T0> {
+    public fun collect_reward<T0>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut turbos_vault::rewarder::RewarderManager,
+        arg2: &mut Strategy,
+        arg3: &Vault,
+        arg4: &sui::clock::Clock,
+        arg5: &mut sui::tx_context::TxContext
+    ) : sui::coin::Coin<T0> {
         turbos_vault::config::checked_package_version(arg0);
         assert!(arg2.status == 0, 15);
         assert!(sui::object::id<Strategy>(arg2) == arg3.strategy_id, 18);
@@ -629,7 +817,22 @@ module turbos_vault::vault {
         sui::coin::from_balance<T0>(turbos_vault::rewarder::withdraw_reward<T0>(arg1, v1, v3), arg5)
     }
     
-    public fun create_strategy<T0, T1, T2>(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut turbos_vault::rewarder::RewarderManager, arg3: &turbos_clmm::pool::Pool<T0, T1, T2>, arg4: u32, arg5: bool, arg6: u32, arg7: bool, arg8: std::string::String, arg9: u32, arg10: u32, arg11: u32, arg12: u32, arg13: &mut sui::tx_context::TxContext) : Strategy {
+    public fun create_strategy<T0, T1, T2>(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut turbos_vault::rewarder::RewarderManager,
+        arg3: &turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg4: u32,
+        arg5: bool,
+        arg6: u32,
+        arg7: bool,
+        arg8: std::string::String,
+        arg9: u32,
+        arg10: u32,
+        arg11: u32,
+        arg12: u32,
+        arg13: &mut sui::tx_context::TxContext
+    ) : Strategy {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         let v0 = turbos_clmm::i32::from_u32_neg(arg4, arg5);
@@ -677,11 +880,31 @@ module turbos_vault::vault {
         v6
     }
     
-    fun decrease_clmm_liquidity<T0, T1, T2>(arg0: &mut turbos_clmm::position_nft::TurbosPositionNFT, arg1: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg2: &mut turbos_clmm::position_manager::Positions, arg3: u128, arg4: &sui::clock::Clock, arg5: &turbos_clmm::pool::Versioned, arg6: &mut sui::tx_context::TxContext) : (sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
+    fun decrease_clmm_liquidity<T0, T1, T2>(
+        arg0: &mut turbos_clmm::position_nft::TurbosPositionNFT,
+        arg1: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg2: &mut turbos_clmm::position_manager::Positions,
+        arg3: u128,
+        arg4: &sui::clock::Clock,
+        arg5: &turbos_clmm::pool::Versioned,
+        arg6: &mut sui::tx_context::TxContext
+    ) : (sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
         turbos_clmm::position_manager::decrease_liquidity_with_return_<T0, T1, T2>(arg1, arg2, arg0, arg3, 0, 0, sui::clock::timestamp_ms(arg4) + 60000, arg4, arg5, arg6)
     }
     
-    public fun deposit<T0, T1, T2>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut turbos_vault::rewarder::RewarderManager, arg2: &mut Strategy, arg3: &mut Vault, arg4: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg5: &mut turbos_clmm::position_manager::Positions, arg6: sui::coin::Coin<T0>, arg7: sui::coin::Coin<T1>, arg8: &sui::clock::Clock, arg9: &turbos_clmm::pool::Versioned, arg10: &mut sui::tx_context::TxContext) {
+    public fun deposit<T0, T1, T2>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut turbos_vault::rewarder::RewarderManager,
+        arg2: &mut Strategy,
+        arg3: &mut Vault,
+        arg4: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg5: &mut turbos_clmm::position_manager::Positions,
+        arg6: sui::coin::Coin<T0>,
+        arg7: sui::coin::Coin<T1>,
+        arg8: &sui::clock::Clock,
+        arg9: &turbos_clmm::pool::Versioned,
+        arg10: &mut sui::tx_context::TxContext
+    ) {
         turbos_vault::config::checked_package_version(arg0);
         assert!(arg2.status == 0, 15);
         assert!(arg2.clmm_pool_id == sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg4), 17);
@@ -752,23 +975,41 @@ module turbos_vault::vault {
         sui::event::emit<DepositEvent>(v33);
     }
     
-    fun extract_clmm_base_nft(arg0: &mut Strategy, arg1: sui::object::ID) : turbos_clmm::position_nft::TurbosPositionNFT {
+    fun extract_clmm_base_nft(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID
+    ) : turbos_clmm::position_nft::TurbosPositionNFT {
         std::option::extract<turbos_clmm::position_nft::TurbosPositionNFT>(&mut borrow_mut_vault_account(arg0, arg1).clmm_base_nft)
     }
     
-    fun extract_clmm_limit_nft(arg0: &mut Strategy, arg1: sui::object::ID) : turbos_clmm::position_nft::TurbosPositionNFT {
+    fun extract_clmm_limit_nft(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID
+    ) : turbos_clmm::position_nft::TurbosPositionNFT {
         std::option::extract<turbos_clmm::position_nft::TurbosPositionNFT>(&mut borrow_mut_vault_account(arg0, arg1).clmm_limit_nft)
     }
     
-    fun fill_clmm_base_nft(arg0: &mut Strategy, arg1: sui::object::ID, arg2: turbos_clmm::position_nft::TurbosPositionNFT) {
+    fun fill_clmm_base_nft(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID,
+        arg2: turbos_clmm::position_nft::TurbosPositionNFT
+    ) {
         std::option::fill<turbos_clmm::position_nft::TurbosPositionNFT>(&mut borrow_mut_vault_account(arg0, arg1).clmm_base_nft, arg2);
     }
     
-    fun fill_clmm_limit_nft(arg0: &mut Strategy, arg1: sui::object::ID, arg2: turbos_clmm::position_nft::TurbosPositionNFT) {
+    fun fill_clmm_limit_nft(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID,
+        arg2: turbos_clmm::position_nft::TurbosPositionNFT
+    ) {
         std::option::fill<turbos_clmm::position_nft::TurbosPositionNFT>(&mut borrow_mut_vault_account(arg0, arg1).clmm_limit_nft, arg2);
     }
     
-    public fun floor_tick_index(arg0: turbos_clmm::i32::I32, arg1: u32, arg2: bool) : turbos_clmm::i32::I32 {
+    public fun floor_tick_index(
+        arg0: turbos_clmm::i32::I32,
+        arg1: u32,
+        arg2: bool
+    ) : turbos_clmm::i32::I32 {
         let v0 = turbos_clmm::i32::from(arg1);
         if (turbos_clmm::i32::eq(turbos_clmm::i32::mod(arg0, v0), turbos_clmm::i32::zero())) {
             if (arg2) {
@@ -794,11 +1035,23 @@ module turbos_vault::vault {
         (arg0.rebalance, arg0.base_lower_index, arg0.base_upper_index, arg0.base_just_increase, arg0.limit_lower_index, arg0.limit_upper_index)
     }
     
-    public fun get_management_fee_rate(arg0: &turbos_vault::config::GlobalConfig, arg1: &Strategy, arg2: sui::object::ID, arg3: &mut sui::tx_context::TxContext) : u64 {
+    // deprecated
+    public fun get_management_fee_rate(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &Strategy,
+        arg2: sui::object::ID,
+        arg3: &mut sui::tx_context::TxContext
+    ) : u64 {
         abort 0
     }
     
-    public fun get_management_fee_rate_v2(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut turbos_vault::config::UserTierConfig, arg2: &Strategy, arg3: sui::object::ID, arg4: &mut sui::tx_context::TxContext) : u64 {
+    public fun get_management_fee_rate_v2(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut turbos_vault::config::UserTierConfig,
+        arg2: &Strategy,
+        arg3: sui::object::ID,
+        arg4: &mut sui::tx_context::TxContext
+    ) : u64 {
         turbos_vault::config::checked_package_version(arg0);
         let v0 = borrow_vault_info(arg2, arg3);
         let v1 = if (!std::option::is_none<u64>(&v0.management_fee_rate)) {
@@ -814,7 +1067,12 @@ module turbos_vault::vault {
         v2
     }
     
-    public fun get_performance_fee_rate(arg0: &turbos_vault::config::GlobalConfig, arg1: &Strategy, arg2: sui::object::ID, arg3: &mut sui::tx_context::TxContext) : u64 {
+    public fun get_performance_fee_rate(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &Strategy,
+        arg2: sui::object::ID,
+        arg3: &mut sui::tx_context::TxContext
+    ) : u64 {
         let v0 = borrow_vault_info(arg1, arg2);
         if (!std::option::is_none<u64>(&v0.performance_fee_rate)) {
             *std::option::borrow<u64>(&v0.performance_fee_rate)
@@ -839,7 +1097,11 @@ module turbos_vault::vault {
         std::string::from_ascii(std::type_name::into_string(std::type_name::get<T0>()))
     }
     
-    public fun get_vault_amount<T0, T1, T2>(arg0: &Strategy, arg1: &turbos_clmm::pool::Pool<T0, T1, T2>, arg2: sui::object::ID) : (u64, u64, u64, u64, u64, u64) {
+    public fun get_vault_amount<T0, T1, T2>(
+        arg0: &Strategy,
+        arg1: &turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg2: sui::object::ID
+    ) : (u64, u64, u64, u64, u64, u64) {
         let v0 = sui::linked_table::borrow<sui::object::ID, VaultInfo>(&arg0.vaults, arg2);
         let v1 = v0.base_liquidity;
         let v2 = v0.limit_liquidity;
@@ -861,7 +1123,10 @@ module turbos_vault::vault {
         (get_vault_balance<T0>(arg0, arg2), get_vault_balance<T1>(arg0, arg2), v5 as u64, v4 as u64, v9 as u64, v8 as u64)
     }
     
-    public fun get_vault_balance<T0>(arg0: &Strategy, arg1: sui::object::ID) : u64 {
+    public fun get_vault_balance<T0>(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : u64 {
         let v0 = borrow_vault_account(arg0, arg1);
         let v1 = get_type_name_str<T0>();
         if (sui::bag::contains<std::string::String>(&v0.balances, v1)) {
@@ -871,48 +1136,81 @@ module turbos_vault::vault {
         }
     }
     
-    public fun get_vault_base_clmm_position_id(arg0: &Strategy, arg1: sui::object::ID) : sui::object::ID {
+    public fun get_vault_base_clmm_position_id(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : sui::object::ID {
         sui::linked_table::borrow<sui::object::ID, VaultInfo>(&arg0.vaults, arg1).base_clmm_position_id
     }
     
-    public fun get_vault_base_last_tick_index(arg0: &Strategy, arg1: sui::object::ID) : turbos_clmm::i32::I32 {
+    public fun get_vault_base_last_tick_index(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : turbos_clmm::i32::I32 {
         sui::linked_table::borrow<sui::object::ID, VaultInfo>(&arg0.vaults, arg1).base_last_tick_index
     }
     
-    public fun get_vault_base_liquidity(arg0: &Strategy, arg1: sui::object::ID) : u128 {
+    public fun get_vault_base_liquidity(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : u128 {
         sui::linked_table::borrow<sui::object::ID, VaultInfo>(&arg0.vaults, arg1).base_liquidity
     }
     
-    public fun get_vault_base_lower_index(arg0: &Strategy, arg1: sui::object::ID) : turbos_clmm::i32::I32 {
+    public fun get_vault_base_lower_index(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : turbos_clmm::i32::I32 {
         sui::linked_table::borrow<sui::object::ID, VaultInfo>(&arg0.vaults, arg1).base_lower_index
     }
     
-    public fun get_vault_base_tick_step(arg0: &Strategy, arg1: sui::object::ID) : u32 {
+    public fun get_vault_base_tick_step(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : u32 {
         sui::linked_table::borrow<sui::object::ID, VaultInfo>(&arg0.vaults, arg1).base_tick_step
     }
     
-    public fun get_vault_base_upper_index(arg0: &Strategy, arg1: sui::object::ID) : turbos_clmm::i32::I32 {
+    public fun get_vault_base_upper_index(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : turbos_clmm::i32::I32 {
         sui::linked_table::borrow<sui::object::ID, VaultInfo>(&arg0.vaults, arg1).base_upper_index
     }
     
-    public fun get_vault_info(arg0: &Strategy, arg1: sui::object::ID) : (turbos_clmm::i32::I32, turbos_clmm::i32::I32, u128, turbos_clmm::i32::I32, turbos_clmm::i32::I32, u128, u128, u128, sui::vec_map::VecMap<std::type_name::TypeName, VaultRewardInfo>) {
+    public fun get_vault_info(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : (turbos_clmm::i32::I32, turbos_clmm::i32::I32, u128, turbos_clmm::i32::I32, turbos_clmm::i32::I32, u128, u128, u128, sui::vec_map::VecMap<std::type_name::TypeName, VaultRewardInfo>) {
         let v0 = sui::linked_table::borrow<sui::object::ID, VaultInfo>(&arg0.vaults, arg1);
         (v0.base_lower_index, v0.base_upper_index, v0.base_liquidity, v0.limit_lower_index, v0.limit_upper_index, v0.limit_liquidity, v0.sqrt_price, v0.share, v0.rewards)
     }
     
-    public fun get_vault_limit_clmm_position_id(arg0: &Strategy, arg1: sui::object::ID) : sui::object::ID {
+    public fun get_vault_limit_clmm_position_id(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : sui::object::ID {
         sui::linked_table::borrow<sui::object::ID, VaultInfo>(&arg0.vaults, arg1).limit_clmm_position_id
     }
     
-    public fun get_vault_limit_last_tick_index(arg0: &Strategy, arg1: sui::object::ID) : turbos_clmm::i32::I32 {
+    public fun get_vault_limit_last_tick_index(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : turbos_clmm::i32::I32 {
         sui::linked_table::borrow<sui::object::ID, VaultInfo>(&arg0.vaults, arg1).limit_last_tick_index
     }
     
-    public fun get_vault_limit_liquidity(arg0: &Strategy, arg1: sui::object::ID) : u128 {
+    public fun get_vault_limit_liquidity(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : u128 {
         sui::linked_table::borrow<sui::object::ID, VaultInfo>(&arg0.vaults, arg1).limit_liquidity
     }
     
-    public fun get_vault_limit_lower_index(arg0: &Strategy, arg1: sui::object::ID) : turbos_clmm::i32::I32 {
+    public fun get_vault_limit_lower_index(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : turbos_clmm::i32::I32 {
         sui::linked_table::borrow<sui::object::ID, VaultInfo>(&arg0.vaults, arg1).limit_lower_index
     }
     
@@ -937,7 +1235,18 @@ module turbos_vault::vault {
         (v0 + v2 + v4, v1 + v3 + v5)
     }
     
-    fun increase_clmm_liquidity<T0, T1, T2>(arg0: &mut Strategy, arg1: sui::object::ID, arg2: bool, arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg4: &mut turbos_clmm::position_manager::Positions, arg5: sui::coin::Coin<T0>, arg6: sui::coin::Coin<T1>, arg7: &sui::clock::Clock, arg8: &turbos_clmm::pool::Versioned, arg9: &mut sui::tx_context::TxContext) : (sui::coin::Coin<T0>, sui::coin::Coin<T1>, turbos_clmm::i32::I32, turbos_clmm::i32::I32, u128) {
+    fun increase_clmm_liquidity<T0, T1, T2>(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID,
+        arg2: bool,
+        arg3: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg4: &mut turbos_clmm::position_manager::Positions,
+        arg5: sui::coin::Coin<T0>,
+        arg6: sui::coin::Coin<T1>,
+        arg7: &sui::clock::Clock,
+        arg8: &turbos_clmm::pool::Versioned,
+        arg9: &mut sui::tx_context::TxContext
+    ) : (sui::coin::Coin<T0>, sui::coin::Coin<T1>, turbos_clmm::i32::I32, turbos_clmm::i32::I32, u128) {
         let v0 = if (arg2) {
             borrow_mut_clmm_base_nft(arg0, arg1)
         } else {
@@ -1000,7 +1309,11 @@ module turbos_vault::vault {
         };
     }
     
-    fun merge_vault_balance<T0>(arg0: &mut Strategy, arg1: sui::object::ID, arg2: sui::balance::Balance<T0>) {
+    fun merge_vault_balance<T0>(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID,
+        arg2: sui::balance::Balance<T0>
+    ) {
         sui::balance::value<T0>(&arg2);
         let v0 = get_type_name_str<T0>();
         let v1 = borrow_mut_vault_account(arg0, arg1);
@@ -1011,11 +1324,36 @@ module turbos_vault::vault {
         };
     }
     
-    fun mint_clmm_liquidity<T0, T1, T2>(arg0: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg1: &mut turbos_clmm::position_manager::Positions, arg2: sui::coin::Coin<T0>, arg3: sui::coin::Coin<T1>, arg4: turbos_clmm::i32::I32, arg5: turbos_clmm::i32::I32, arg6: &sui::clock::Clock, arg7: &turbos_clmm::pool::Versioned, arg8: &mut sui::tx_context::TxContext) : (turbos_clmm::position_nft::TurbosPositionNFT, sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
+    fun mint_clmm_liquidity<T0, T1, T2>(
+        arg0: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg1: &mut turbos_clmm::position_manager::Positions,
+        arg2: sui::coin::Coin<T0>,
+        arg3: sui::coin::Coin<T1>,
+        arg4: turbos_clmm::i32::I32,
+        arg5: turbos_clmm::i32::I32,
+        arg6: &sui::clock::Clock,
+        arg7: &turbos_clmm::pool::Versioned,
+        arg8: &mut sui::tx_context::TxContext
+    ) : (turbos_clmm::position_nft::TurbosPositionNFT, sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
         turbos_clmm::position_manager::mint_with_return_<T0, T1, T2>(arg0, arg1, coin_to_vec<T0>(arg2), coin_to_vec<T1>(arg3), turbos_clmm::i32::abs_u32(arg4), turbos_clmm::i32::is_neg(arg4), turbos_clmm::i32::abs_u32(arg5), turbos_clmm::i32::is_neg(arg5), sui::coin::value<T0>(&arg2), sui::coin::value<T1>(&arg3), 0, 0, sui::clock::timestamp_ms(arg6) + 60000, arg6, arg7, arg8)
     }
     
-    public fun open_vault<T0, T1, T2>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut Strategy, arg2: &turbos_clmm::pool::Pool<T0, T1, T2>, arg3: u32, arg4: bool, arg5: u32, arg6: bool, arg7: u32, arg8: bool, arg9: u32, arg10: bool, arg11: u32, arg12: u32, arg13: &mut sui::tx_context::TxContext) : Vault {
+    public fun open_vault<T0, T1, T2>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut Strategy,
+        arg2: &turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg3: u32,
+        arg4: bool,
+        arg5: u32,
+        arg6: bool,
+        arg7: u32,
+        arg8: bool,
+        arg9: u32,
+        arg10: bool,
+        arg11: u32,
+        arg12: u32,
+        arg13: &mut sui::tx_context::TxContext
+    ) : Vault {
         turbos_vault::config::checked_package_version(arg0);
         assert!(arg1.status == 0, 15);
         assert!(arg1.clmm_pool_id == sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg2), 17);
@@ -1079,11 +1417,55 @@ module turbos_vault::vault {
         v9
     }
     
-    public fun rebalance<T0, T1, T2>(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut turbos_vault::rewarder::RewarderManager, arg3: &mut Strategy, arg4: sui::object::ID, arg5: bool, arg6: bool, arg7: u32, arg8: bool, arg9: u32, arg10: bool, arg11: u32, arg12: bool, arg13: u32, arg14: bool, arg15: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg16: &mut turbos_clmm::position_manager::Positions, arg17: &sui::clock::Clock, arg18: &turbos_clmm::pool::Versioned, arg19: &mut sui::tx_context::TxContext) {
+    // deprecated
+    public fun rebalance<T0, T1, T2>(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut turbos_vault::rewarder::RewarderManager,
+        arg3: &mut Strategy,
+        arg4: sui::object::ID,
+        arg5: bool, arg6: bool,
+        arg7: u32,
+        arg8: bool,
+        arg9: u32,
+        arg10: bool,
+        arg11: u32,
+        arg12: bool,
+        arg13: u32,
+        arg14: bool,
+        arg15: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg16: &mut turbos_clmm::position_manager::Positions,
+        arg17: &sui::clock::Clock,
+        arg18: &turbos_clmm::pool::Versioned,
+        arg19: &mut sui::tx_context::TxContext
+    ) {
         abort 0
     }
     
-    public fun rebalance_with_fee<T0, T1, T2>(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut turbos_vault::rewarder::RewarderManager, arg3: &mut Strategy, arg4: sui::object::ID, arg5: bool, arg6: bool, arg7: u32, arg8: bool, arg9: u32, arg10: bool, arg11: u32, arg12: bool, arg13: u32, arg14: bool, arg15: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg16: &mut turbos_clmm::position_manager::Positions, arg17: u64, arg18: u64, arg19: &sui::clock::Clock, arg20: &turbos_clmm::pool::Versioned, arg21: &mut sui::tx_context::TxContext) : (sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
+    public fun rebalance_with_fee<T0, T1, T2>(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut turbos_vault::rewarder::RewarderManager,
+        arg3: &mut Strategy,
+        arg4: sui::object::ID,
+        arg5: bool,
+        arg6: bool,
+        arg7: u32,
+        arg8: bool,
+        arg9: u32,
+        arg10: bool,
+        arg11: u32,
+        arg12: bool,
+        arg13: u32,
+        arg14: bool,
+        arg15: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg16: &mut turbos_clmm::position_manager::Positions,
+        arg17: u64,
+        arg18: u64,
+        arg19: &sui::clock::Clock,
+        arg20: &turbos_clmm::pool::Versioned,
+        arg21: &mut sui::tx_context::TxContext
+    ) : (sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
         turbos_vault::config::checked_package_version(arg1);
         assert!(arg3.status == 0, 15);
         assert!(arg3.clmm_pool_id == sui::object::id<turbos_clmm::pool::Pool<T0, T1, T2>>(arg15), 17);
@@ -1232,11 +1614,17 @@ module turbos_vault::vault {
         (sui::coin::from_balance<T0>(v8, arg21), sui::coin::from_balance<T1>(v9, arg21))
     }
     
-    fun remove_vault_info(arg0: &mut Strategy, arg1: sui::object::ID) : VaultInfo {
+    fun remove_vault_info(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID
+    ) : VaultInfo {
         sui::linked_table::remove<sui::object::ID, VaultInfo>(&mut arg0.vaults, arg1)
     }
     
-    fun take_protocol_asset_by_amount<T0>(arg0: &mut Strategy, arg1: u64) : sui::balance::Balance<T0> {
+    fun take_protocol_asset_by_amount<T0>(
+        arg0: &mut Strategy,
+        arg1: u64
+    ) : sui::balance::Balance<T0> {
         let v0 = get_type_name_str<T0>();
         assert!(sui::bag::contains<std::string::String>(&arg0.protocol_fees, v0), 11);
         let v1 = sui::bag::borrow_mut<std::string::String, sui::balance::Balance<T0>>(&mut arg0.protocol_fees, v0);
@@ -1244,7 +1632,10 @@ module turbos_vault::vault {
         sui::balance::split<T0>(v1, arg1)
     }
     
-    fun take_vault_balance<T0>(arg0: &mut Strategy, arg1: sui::object::ID) : sui::balance::Balance<T0> {
+    fun take_vault_balance<T0>(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID
+    ) : sui::balance::Balance<T0> {
         let v0 = get_type_name_str<T0>();
         let v1 = borrow_mut_vault_account(arg0, arg1);
         if (sui::bag::contains<std::string::String>(&v1.balances, v0)) {
@@ -1254,7 +1645,11 @@ module turbos_vault::vault {
         }
     }
     
-    fun take_vault_balance_by_amount<T0>(arg0: &mut Strategy, arg1: sui::object::ID, arg2: u64) : sui::balance::Balance<T0> {
+    fun take_vault_balance_by_amount<T0>(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID,
+        arg2: u64
+    ) : sui::balance::Balance<T0> {
         let v0 = get_type_name_str<T0>();
         let v1 = borrow_mut_vault_account(arg0, arg1);
         if (sui::bag::contains<std::string::String>(&v1.balances, v0) && arg2 > 0) {
@@ -1271,42 +1666,68 @@ module turbos_vault::vault {
         }
     }
     
-    public(friend) fun update_strategy_base_minimum_threshold(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: u32) : u32 {
+    public(friend) fun update_strategy_base_minimum_threshold(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut Strategy,
+        arg3: u32
+    ) : u32 {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         arg2.base_tick_step_minimum = arg3;
         arg3
     }
     
-    public(friend) fun update_strategy_default_base_rebalance_threshold(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: u32) : u32 {
+    public(friend) fun update_strategy_default_base_rebalance_threshold(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut Strategy,
+        arg3: u32
+    ) : u32 {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         arg2.default_base_rebalance_percentage = arg3;
         arg3
     }
     
-    public(friend) fun update_strategy_default_limit_rebalance_threshold(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: u32) : u32 {
+    public(friend) fun update_strategy_default_limit_rebalance_threshold(
+        arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: u32) : u32 {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         arg2.default_limit_rebalance_percentage = arg3;
         arg3
     }
     
-    public(friend) fun update_strategy_image_url(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: std::string::String) : std::string::String {
+    public(friend) fun update_strategy_image_url(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut Strategy,
+        arg3: std::string::String
+    ) : std::string::String {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         arg2.image_url = arg3;
         arg3
     }
     
-    public(friend) fun update_strategy_limit_minimum_threshold(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: u32) : u32 {
+    public(friend) fun update_strategy_limit_minimum_threshold(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut Strategy,
+        arg3: u32
+    ) : u32 {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         arg2.limit_tick_step_minimum = arg3;
         arg3
     }
     
-    public(friend) fun update_strategy_management_fee_rate(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: u64) : u64 {
+    public(friend) fun update_strategy_management_fee_rate(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut Strategy,
+        arg3: u64
+    ) : u64 {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         assert!(arg3 <= 1000000, 5);
@@ -1320,7 +1741,12 @@ module turbos_vault::vault {
         arg3
     }
     
-    public(friend) fun update_strategy_performance_fee_rate(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: u64) : u64 {
+    public(friend) fun update_strategy_performance_fee_rate(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut Strategy,
+        arg3: u64
+    ) : u64 {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         assert!(arg3 <= 1000000, 5);
@@ -1334,7 +1760,12 @@ module turbos_vault::vault {
         arg3
     }
     
-    fun update_strategy_reward_info(arg0: &mut turbos_vault::rewarder::RewarderManager, arg1: &mut Strategy, arg2: sui::object::ID, arg3: &sui::clock::Clock) : u128 {
+    fun update_strategy_reward_info(
+        arg0: &mut turbos_vault::rewarder::RewarderManager,
+        arg1: &mut Strategy,
+        arg2: sui::object::ID,
+        arg3: &sui::clock::Clock
+    ) : u128 {
         let v0 = 0;
         let v1 = v0;
         let v2 = sui::object::id<Strategy>(arg1);
@@ -1354,28 +1785,59 @@ module turbos_vault::vault {
         v1
     }
     
-    public(friend) fun update_strategy_status(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: u8) : u8 {
+    public(friend) fun update_strategy_status(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut Strategy,
+        arg3: u8
+    ) : u8 {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         arg2.status = arg3;
         arg3
     }
     
-    public(friend) fun update_vault_base_rebalance_threshold(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: sui::object::ID, arg4: u32) : u32 {
+    public(friend) fun update_vault_base_rebalance_threshold(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut Strategy,
+        arg3: sui::object::ID,
+        arg4: u32
+    ) : u32 {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         borrow_mut_vault_info(arg2, arg3).base_rebalance_threshold = arg4;
         arg4
     }
     
-    fun update_vault_info(arg0: &mut Strategy, arg1: sui::object::ID, arg2: u128, arg3: u128, arg4: u128) {
+    fun update_vault_info(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID,
+        arg2: u128,
+        arg3: u128,
+        arg4: u128
+    ) {
         let v0 = borrow_mut_vault_info(arg0, arg1);
         v0.base_liquidity = arg2;
         v0.limit_liquidity = arg3;
         v0.sqrt_price = arg4;
     }
     
-    fun update_vault_info_with_tick_range(arg0: &mut Strategy, arg1: sui::object::ID, arg2: sui::object::ID, arg3: turbos_clmm::i32::I32, arg4: turbos_clmm::i32::I32, arg5: u128, arg6: sui::object::ID, arg7: turbos_clmm::i32::I32, arg8: turbos_clmm::i32::I32, arg9: u128, arg10: u128, arg11: turbos_clmm::i32::I32, arg12: turbos_clmm::i32::I32) {
+    fun update_vault_info_with_tick_range(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID,
+        arg2: sui::object::ID,
+        arg3: turbos_clmm::i32::I32,
+        arg4: turbos_clmm::i32::I32,
+        arg5: u128,
+        arg6: sui::object::ID,
+        arg7: turbos_clmm::i32::I32,
+        arg8: turbos_clmm::i32::I32,
+        arg9: u128,
+        arg10: u128,
+        arg11: turbos_clmm::i32::I32,
+        arg12: turbos_clmm::i32::I32
+    ) {
         let v0 = borrow_mut_vault_info(arg0, arg1);
         v0.base_clmm_position_id = arg2;
         v0.base_lower_index = arg3;
@@ -1390,14 +1852,26 @@ module turbos_vault::vault {
         v0.limit_last_tick_index = arg12;
     }
     
-    public(friend) fun update_vault_limit_rebalance_threshold(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: sui::object::ID, arg4: u32) : u32 {
+    public(friend) fun update_vault_limit_rebalance_threshold(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut Strategy,
+        arg3: sui::object::ID,
+        arg4: u32
+    ) : u32 {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         borrow_mut_vault_info(arg2, arg3).limit_rebalance_threshold = arg4;
         arg4
     }
     
-    public(friend) fun update_vault_management_fee_rate(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: sui::object::ID, arg4: u64) : u64 {
+    public(friend) fun update_vault_management_fee_rate(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut Strategy,
+        arg3: sui::object::ID,
+        arg4: u64
+    ) : u64 {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         let v0 = borrow_mut_vault_info(arg2, arg3);
@@ -1413,7 +1887,13 @@ module turbos_vault::vault {
         arg4
     }
     
-    public(friend) fun update_vault_performance_fee_rate(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut Strategy, arg3: sui::object::ID, arg4: u64) : u64 {
+    public(friend) fun update_vault_performance_fee_rate(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut Strategy,
+        arg3: sui::object::ID,
+        arg4: u64
+    ) : u64 {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_vault_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         let v0 = borrow_mut_vault_info(arg2, arg3);
@@ -1429,7 +1909,12 @@ module turbos_vault::vault {
         arg4
     }
     
-    fun update_vault_reward_info(arg0: &mut Strategy, arg1: sui::object::ID, arg2: sui::vec_map::VecMap<std::type_name::TypeName, u128>, arg3: u128) {
+    fun update_vault_reward_info(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID,
+        arg2: sui::vec_map::VecMap<std::type_name::TypeName, u128>,
+        arg3: u128
+    ) {
         let v0 = borrow_mut_vault_info(arg0, arg1);
         let v1 = 0;
         while (v1 < sui::vec_map::size<std::type_name::TypeName, u128>(&arg2)) {
@@ -1451,7 +1936,11 @@ module turbos_vault::vault {
         v0.share = arg3;
     }
     
-    fun update_vault_reward_info_on_claim(arg0: &mut Strategy, arg1: sui::object::ID, arg2: std::type_name::TypeName) : u64 {
+    fun update_vault_reward_info_on_claim(
+        arg0: &mut Strategy,
+        arg1: sui::object::ID,
+        arg2: std::type_name::TypeName
+    ) : u64 {
         let v0 = sui::vec_map::get_mut<std::type_name::TypeName, VaultRewardInfo>(&mut borrow_mut_vault_info(arg0, arg1).rewards, &arg2);
         let v1 = v0.reward;
         v0.reward = 0;
@@ -1459,7 +1948,11 @@ module turbos_vault::vault {
         v1 as u64
     }
     
-    public fun vault_balance_amount<T0>(arg0: &Strategy, arg1: sui::object::ID) : u64 {
+    // deprecated
+    public fun vault_balance_amount<T0>(
+        arg0: &Strategy,
+        arg1: sui::object::ID
+    ) : u64 {
         let v0 = get_type_name_str<T0>();
         let v1 = borrow_vault_account(arg0, arg1);
         if (sui::bag::contains<std::string::String>(&v1.balances, v0)) {
@@ -1469,11 +1962,37 @@ module turbos_vault::vault {
         }
     }
     
-    public fun withdraw<T0, T1, T2>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut turbos_vault::rewarder::RewarderManager, arg2: &mut Strategy, arg3: &mut Vault, arg4: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg5: &mut turbos_clmm::position_manager::Positions, arg6: u64, arg7: bool, arg8: &sui::clock::Clock, arg9: &turbos_clmm::pool::Versioned, arg10: &mut sui::tx_context::TxContext) : (sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
+    // deprecated
+    public fun withdraw<T0, T1, T2>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut turbos_vault::rewarder::RewarderManager,
+        arg2: &mut Strategy,
+        arg3: &mut Vault,
+        arg4: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg5: &mut turbos_clmm::position_manager::Positions,
+        arg6: u64,
+        arg7: bool,
+        arg8: &sui::clock::Clock,
+        arg9: &turbos_clmm::pool::Versioned,
+        arg10: &mut sui::tx_context::TxContext
+    ) : (sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
         abort 0
     }
     
-    public fun withdraw_v2<T0, T1, T2>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut turbos_vault::config::UserTierConfig, arg2: &mut turbos_vault::rewarder::RewarderManager, arg3: &mut Strategy, arg4: &mut Vault, arg5: &mut turbos_clmm::pool::Pool<T0, T1, T2>, arg6: &mut turbos_clmm::position_manager::Positions, arg7: u64, arg8: bool, arg9: &sui::clock::Clock, arg10: &turbos_clmm::pool::Versioned, arg11: &mut sui::tx_context::TxContext) : (sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
+    public fun withdraw_v2<T0, T1, T2>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut turbos_vault::config::UserTierConfig,
+        arg2: &mut turbos_vault::rewarder::RewarderManager,
+        arg3: &mut Strategy,
+        arg4: &mut Vault,
+        arg5: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+        arg6: &mut turbos_clmm::position_manager::Positions,
+        arg7: u64,
+        arg8: bool,
+        arg9: &sui::clock::Clock,
+        arg10: &turbos_clmm::pool::Versioned,
+        arg11: &mut sui::tx_context::TxContext
+    ) : (sui::coin::Coin<T0>, sui::coin::Coin<T1>) {
         turbos_vault::config::checked_package_version(arg0);
         assert!(arg3.status == 0, 15);
         assert!(arg7 > 0 && arg7 <= 1000000, 2);

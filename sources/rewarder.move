@@ -43,7 +43,10 @@ module turbos_vault::rewarder {
         after_amount: u64,
     }
     
-    public(friend) fun accumulate_rewarder_released(arg0: &mut Rewarder, arg1: u64) {
+    public(friend) fun accumulate_rewarder_released(
+        arg0: &mut Rewarder,
+        arg1: u64
+    ) {
         if (arg0.last_reward_time < arg1) {
             if (arg0.emission_per_second > 0) {
                 arg0.total_reward_released = arg0.total_reward_released + ((arg0.emission_per_second * (arg1 - arg0.last_reward_time)) as u128);
@@ -52,7 +55,12 @@ module turbos_vault::rewarder {
         };
     }
     
-    public(friend) fun accumulate_strategy_reward(arg0: &mut Rewarder, arg1: sui::object::ID, arg2: u128, arg3: u64) : u128 {
+    public(friend) fun accumulate_strategy_reward(
+        arg0: &mut Rewarder,
+        arg1: sui::object::ID,
+        arg2: u128,
+        arg3: u64
+    ) : u128 {
         let v0 = sui::linked_table::borrow_mut<sui::object::ID, StrategyRewarderInfo>(&mut arg0.strategys, arg1);
         if (arg3 > v0.last_reward_time && arg0.emission_per_second > 0) {
             if (arg2 > 0) {
@@ -65,7 +73,10 @@ module turbos_vault::rewarder {
         v0.acc_per_share
     }
     
-    public(friend) fun accumulate_strategys_reward<T0>(arg0: &mut RewarderManager, arg1: u64) {
+    public(friend) fun accumulate_strategys_reward<T0>(
+        arg0: &mut RewarderManager,
+        arg1: u64
+    ) {
         let v0 = sui::linked_table::borrow_mut<std::type_name::TypeName, Rewarder>(&mut arg0.rewarders, std::type_name::get<T0>());
         let v1 = sui::linked_table::front<sui::object::ID, StrategyRewarderInfo>(&v0.strategys);
         while (std::option::is_some<sui::object::ID>(v1)) {
@@ -76,7 +87,13 @@ module turbos_vault::rewarder {
         v0.last_reward_time = arg1;
     }
     
-    public fun add_reward_black_list(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut RewarderManager, arg3: vector<address>, arg4: &mut sui::tx_context::TxContext) {
+    public fun add_reward_black_list(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut RewarderManager,
+        arg3: vector<address>,
+        arg4: &mut sui::tx_context::TxContext
+    ) {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_reward_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         while (std::vector::length<address>(&arg3) > 0) {
@@ -88,7 +105,12 @@ module turbos_vault::rewarder {
         };
     }
     
-    public(friend) fun add_strategy<T0>(arg0: &mut RewarderManager, arg1: sui::object::ID, arg2: u64, arg3: &sui::clock::Clock) {
+    public(friend) fun add_strategy<T0>(
+        arg0: &mut RewarderManager,
+        arg1: sui::object::ID,
+        arg2: u64,
+        arg3: &sui::clock::Clock
+    ) {
         assert!(is_strategy_registered(arg0, arg1), 2);
         let v0 = std::type_name::get<T0>();
         assert!(!is_strategy_in_rewarder(arg0, v0, arg1), 2);
@@ -105,7 +127,14 @@ module turbos_vault::rewarder {
         v2.total_allocate_point = v2.total_allocate_point + arg2;
     }
     
-    public fun create_rewarder<T0>(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut RewarderManager, arg3: u64, arg4: &sui::clock::Clock, arg5: &mut sui::tx_context::TxContext) {
+    public fun create_rewarder<T0>(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut RewarderManager,
+        arg3: u64,
+        arg4: &sui::clock::Clock,
+        arg5: &mut sui::tx_context::TxContext
+    ) {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_reward_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         let v0 = std::type_name::get<T0>();
@@ -127,7 +156,12 @@ module turbos_vault::rewarder {
         sui::event::emit<CreateRewarderEvent>(v2);
     }
     
-    public fun deposit_rewarder<T0>(arg0: &turbos_vault::config::GlobalConfig, arg1: &mut RewarderManager, arg2: sui::coin::Coin<T0>, arg3: &mut sui::tx_context::TxContext) {
+    public fun deposit_rewarder<T0>(
+        arg0: &turbos_vault::config::GlobalConfig,
+        arg1: &mut RewarderManager,
+        arg2: sui::coin::Coin<T0>,
+        arg3: &mut sui::tx_context::TxContext
+    ) {
         turbos_vault::config::checked_package_version(arg0);
         assert!(sui::coin::value<T0>(&arg2) > 0, 6);
         let v0 = std::type_name::get<T0>();
@@ -160,7 +194,11 @@ module turbos_vault::rewarder {
         v0
     }
     
-    fun is_strategy_in_rewarder(arg0: &RewarderManager, arg1: std::type_name::TypeName, arg2: sui::object::ID) : bool {
+    fun is_strategy_in_rewarder(
+        arg0: &RewarderManager,
+        arg1: std::type_name::TypeName,
+        arg2: sui::object::ID
+    ) : bool {
         sui::linked_table::contains<sui::object::ID, StrategyRewarderInfo>(&sui::linked_table::borrow<std::type_name::TypeName, Rewarder>(&arg0.rewarders, arg1).strategys, arg2)
     }
     
@@ -173,7 +211,13 @@ module turbos_vault::rewarder {
         sui::linked_table::push_back<sui::object::ID, u128>(&mut arg0.strategy_shares, arg1, 0);
     }
     
-    public fun remove_reward_black_list(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut RewarderManager, arg3: vector<address>, arg4: &mut sui::tx_context::TxContext) {
+    public fun remove_reward_black_list(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut RewarderManager,
+        arg3: vector<address>,
+        arg4: &mut sui::tx_context::TxContext
+    ) {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_reward_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         while (std::vector::length<address>(&arg3) > 0) {
@@ -186,11 +230,20 @@ module turbos_vault::rewarder {
         };
     }
     
-    public(friend) fun set_strategy_share(arg0: &mut RewarderManager, arg1: sui::object::ID, arg2: u128) {
+    public(friend) fun set_strategy_share(
+        arg0: &mut RewarderManager,
+        arg1: sui::object::ID,
+        arg2: u128
+    ) {
         *sui::linked_table::borrow_mut<sui::object::ID, u128>(&mut arg0.strategy_shares, arg1) = arg2;
     }
     
-    public(friend) fun strategy_rewards_settle(arg0: &mut RewarderManager, arg1: vector<std::type_name::TypeName>, arg2: sui::object::ID, arg3: &sui::clock::Clock) : sui::vec_map::VecMap<std::type_name::TypeName, u128> {
+    public(friend) fun strategy_rewards_settle(
+        arg0: &mut RewarderManager,
+        arg1: vector<std::type_name::TypeName>,
+        arg2: sui::object::ID,
+        arg3: &sui::clock::Clock
+    ) : sui::vec_map::VecMap<std::type_name::TypeName, u128> {
         assert!(is_strategy_registered(arg0, arg2), 2);
         let v0 = sui::clock::timestamp_ms(arg3) / 1000;
         let v1 = sui::vec_map::empty<std::type_name::TypeName, u128>();
@@ -203,7 +256,13 @@ module turbos_vault::rewarder {
         v1
     }
     
-    public fun update_rewarder<T0>(arg0: &turbos_vault::config::OperatorCap, arg1: &turbos_vault::config::GlobalConfig, arg2: &mut RewarderManager, arg3: u64, arg4: &sui::clock::Clock) {
+    public fun update_rewarder<T0>(
+        arg0: &turbos_vault::config::OperatorCap,
+        arg1: &turbos_vault::config::GlobalConfig,
+        arg2: &mut RewarderManager,
+        arg3: u64,
+        arg4: &sui::clock::Clock
+    ) {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_reward_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
         let v0 = std::type_name::get<T0>();
@@ -220,7 +279,11 @@ module turbos_vault::rewarder {
         sui::event::emit<UpdateRewarderEvent>(v3);
     }
     
-    public(friend) fun withdraw_reward<T0>(arg0: &mut RewarderManager, arg1: sui::object::ID, arg2: u64) : sui::balance::Balance<T0> {
+    public(friend) fun withdraw_reward<T0>(
+        arg0: &mut RewarderManager,
+        arg1: sui::object::ID,
+        arg2: u64
+    ) : sui::balance::Balance<T0> {
         let v0 = std::type_name::get<T0>();
         assert!(is_strategy_registered(arg0, arg1), 2);
         assert!(is_strategy_in_rewarder(arg0, v0, arg1), 4);
