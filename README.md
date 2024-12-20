@@ -1,1 +1,5 @@
-# turbos-vault-sc
+# Turbos Vault
+
+Turbos Automated Rebalance Vault is a pioneering tool within the Sui ecosystem designed to revolutionize how individual liquidity providers manage their assets. At the core of Turbos Vault is our innovative, isolated vault design, which not only maximizes security by ensuring that user assets are always under their control but also leverages Sui's efficient gas economy. This unique setup allows users to customize their rebalancing strategies to suit personal investment styles and risk tolerance levels, rather than being confined to one-size-fits-all strategies typical of traditional shared pool models. 
+
+With Turbos, each LP gains the flexibility to experiment with various range strategies, enhancing potential returns through real-time, cost-effective adjustments, even during peak network times. 
