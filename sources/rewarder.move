@@ -1,4 +1,6 @@
 module turbos_vault::rewarder {
+    friend turbos_valut::vault;
+    
     struct StrategyRewarderInfo has store {
         allocate_point: u64,
         acc_per_share: u128,
@@ -64,7 +66,8 @@ module turbos_vault::rewarder {
         let v0 = sui::linked_table::borrow_mut<sui::object::ID, StrategyRewarderInfo>(&mut arg0.strategys, arg1);
         if (arg3 > v0.last_reward_time && arg0.emission_per_second > 0) {
             if (arg2 > 0) {
-                v0.acc_per_share = v0.acc_per_share + turbos_clmm::full_math_u128::mul_div_floor((arg0.emission_per_second * (arg3 - v0.last_reward_time) * v0.allocate_point / arg0.total_allocate_point) as u128, 1000000000, arg2);
+                let emission = arg0.emission_per_second * (arg3 - v0.last_reward_time) * v0.allocate_point / arg0.total_allocate_point;
+                v0.acc_per_share = v0.acc_per_share + turbos_clmm::full_math_u128::mul_div_floor((emission as u128), 1000000000, arg2);
             } else {
                 v0.acc_per_share = 0;
             };
@@ -92,7 +95,7 @@ module turbos_vault::rewarder {
         arg1: &turbos_vault::config::GlobalConfig,
         arg2: &mut RewarderManager,
         arg3: vector<address>,
-        arg4: &mut sui::tx_context::TxContext
+        _: &mut sui::tx_context::TxContext
     ) {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_reward_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));
@@ -160,7 +163,7 @@ module turbos_vault::rewarder {
         arg0: &turbos_vault::config::GlobalConfig,
         arg1: &mut RewarderManager,
         arg2: sui::coin::Coin<T0>,
-        arg3: &mut sui::tx_context::TxContext
+        _: &mut sui::tx_context::TxContext
     ) {
         turbos_vault::config::checked_package_version(arg0);
         assert!(sui::coin::value<T0>(&arg2) > 0, 6);
@@ -216,7 +219,7 @@ module turbos_vault::rewarder {
         arg1: &turbos_vault::config::GlobalConfig,
         arg2: &mut RewarderManager,
         arg3: vector<address>,
-        arg4: &mut sui::tx_context::TxContext
+        _: &mut sui::tx_context::TxContext
     ) {
         turbos_vault::config::checked_package_version(arg1);
         turbos_vault::config::check_reward_manager_role(arg1, sui::object::id_address<turbos_vault::config::OperatorCap>(arg0));

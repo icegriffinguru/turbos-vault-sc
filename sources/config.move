@@ -1,4 +1,6 @@
 module turbos_vault::config {
+    friend turbos_vault::router;
+
     ////////////////////////////////////////////////
     /// Structs
     ////////////////////////////////////////////////
@@ -99,7 +101,7 @@ module turbos_vault::config {
         sui::event::emit<InitConfigEvent>(event);
     }
 
-    public(friend) fun add_role(arg0: &AdminCap, arg1: &mut GlobalConfig, arg2: address, arg3: u8) {
+    public(friend) fun add_role(_: &AdminCap, arg1: &mut GlobalConfig, arg2: address, arg3: u8) {
         checked_package_version(arg1);
         turbos_vault::acl::add_role(&mut arg1.acl, arg2, arg3);
         let v0 = AddRoleEvent{
@@ -113,14 +115,14 @@ module turbos_vault::config {
         turbos_vault::acl::get_members(&arg0.acl)
     }
     
-    public(friend) fun remove_member(arg0: &AdminCap, arg1: &mut GlobalConfig, arg2: address) {
+    public(friend) fun remove_member(_: &AdminCap, arg1: &mut GlobalConfig, arg2: address) {
         checked_package_version(arg1);
         turbos_vault::acl::remove_member(&mut arg1.acl, arg2);
         let v0 = RemoveMemberEvent{member: arg2};
         sui::event::emit<RemoveMemberEvent>(v0);
     }
     
-    public(friend) fun remove_role(arg0: &AdminCap, arg1: &mut GlobalConfig, arg2: address, arg3: u8) {
+    public(friend) fun remove_role(_: &AdminCap, arg1: &mut GlobalConfig, arg2: address, arg3: u8) {
         checked_package_version(arg1);
         turbos_vault::acl::remove_role(&mut arg1.acl, arg2, arg3);
         let v0 = RemoveRoleEvent{
@@ -130,7 +132,7 @@ module turbos_vault::config {
         sui::event::emit<RemoveRoleEvent>(v0);
     }
     
-    public(friend) fun set_roles(arg0: &AdminCap, arg1: &mut GlobalConfig, arg2: address, arg3: u128) {
+    public(friend) fun set_roles(_: &AdminCap, arg1: &mut GlobalConfig, arg2: address, arg3: u128) {
         checked_package_version(arg1);
         turbos_vault::acl::set_roles(&mut arg1.acl, arg2, arg3);
         let v0 = SetRolesEvent{
@@ -140,7 +142,13 @@ module turbos_vault::config {
         sui::event::emit<SetRolesEvent>(v0);
     }
     
-    public(friend) fun add_operator(arg0: &AdminCap, arg1: &mut GlobalConfig, arg2: u128, arg3: address, arg4: &mut sui::tx_context::TxContext) {
+    public(friend) fun add_operator(
+        _: &AdminCap,
+        arg1: &mut GlobalConfig,
+        arg2: u128,
+        arg3: address,
+        arg4: &mut sui::tx_context::TxContext
+    ) {
         checked_package_version(arg1);
         let v0 = OperatorCap{id: sui::object::new(arg4)};
         turbos_vault::acl::set_roles(&mut arg1.acl, sui::object::id_address<OperatorCap>(&v0), arg2);
@@ -169,9 +177,9 @@ module turbos_vault::config {
         assert!(arg0.package_version == 3, 0);
     }
     
-    public fun get_tier(arg0: &GlobalConfig, arg1: address) : (u64, u64) {
-        abort 0
-    }
+    // public fun get_tier(arg0: &GlobalConfig, arg1: address) : (u64, u64) {
+    //     abort 0
+    // }
     
     public fun get_tier_v2(arg0: &GlobalConfig, arg1: &mut UserTierConfig, arg2: address) : (u64, u64) {
         checked_package_version(arg0);
@@ -183,20 +191,20 @@ module turbos_vault::config {
         }
     }
     
-    public(friend) fun new_user_tier_config(arg0: &AdminCap, arg1: &mut sui::tx_context::TxContext) {
+    public(friend) fun new_user_tier_config(admin_cap: &AdminCap, arg1: &mut sui::tx_context::TxContext) {
         let v0 = UserTierConfig{
             id         : sui::object::new(arg1), 
             user_tiers : sui::table::new<address, Tier>(arg1),
         };
         sui::transfer::public_share_object<UserTierConfig>(v0);
         let v1 = InitUserTierConfigEvent{
-            admin_cap_id        : sui::object::id<AdminCap>(arg0), 
+            admin_cap_id        : sui::object::id<AdminCap>(admin_cap), 
             user_tier_config_id : sui::object::id<UserTierConfig>(&v0),
         };
         sui::event::emit<InitUserTierConfigEvent>(v1);
     }
     
-    public(friend) fun set_package_version(arg0: &AdminCap, arg1: &mut GlobalConfig, arg2: u64) {
+    public(friend) fun set_package_version(_: &AdminCap, arg1: &mut GlobalConfig, arg2: u64) {
         let v0 = arg1.package_version;
         assert!(arg2 > v0, 0);
         arg1.package_version = arg2;
@@ -207,11 +215,19 @@ module turbos_vault::config {
         sui::event::emit<SetPackageVersion>(v1);
     }
     
-    public(friend) fun set_tier(arg0: &AdminCap, arg1: &mut GlobalConfig, arg2: address, arg3: u64, arg4: u64, arg5: &mut sui::tx_context::TxContext) {
-        abort 0
-    }
+    // public(friend) fun set_tier(_: &AdminCap, arg1: &mut GlobalConfig, arg2: address, arg3: u64, arg4: u64, arg5: &mut sui::tx_context::TxContext) {
+    //     abort 0
+    // }
     
-    public(friend) fun set_tier_v2(arg0: &AdminCap, arg1: &GlobalConfig, arg2: &mut UserTierConfig, arg3: address, arg4: u64, arg5: u64, arg6: &mut sui::tx_context::TxContext) {
+    public(friend) fun set_tier_v2(
+        _: &AdminCap,
+        arg1: &GlobalConfig,
+        arg2: &mut UserTierConfig,
+        arg3: address,
+        arg4: u64,
+        arg5: u64,
+        _: &mut sui::tx_context::TxContext
+    ) {
         checked_package_version(arg1);
         assert!(arg4 <= 1000000, 4);
         assert!(arg5 <= 1000000, 5);

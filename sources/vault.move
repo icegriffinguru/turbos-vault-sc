@@ -1,4 +1,8 @@
 module turbos_vault::vault {
+    friend turbos_vault::config;
+    friend turbos_vault::rewarder;
+    friend turbos_vault::router;
+
     struct VAULT has drop {
         dummy_field: bool,
     }
@@ -1418,29 +1422,29 @@ module turbos_vault::vault {
     }
     
     // deprecated
-    public fun rebalance<T0, T1, T2>(
-        arg0: &turbos_vault::config::OperatorCap,
-        arg1: &turbos_vault::config::GlobalConfig,
-        arg2: &mut turbos_vault::rewarder::RewarderManager,
-        arg3: &mut Strategy,
-        arg4: sui::object::ID,
-        arg5: bool, arg6: bool,
-        arg7: u32,
-        arg8: bool,
-        arg9: u32,
-        arg10: bool,
-        arg11: u32,
-        arg12: bool,
-        arg13: u32,
-        arg14: bool,
-        arg15: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
-        arg16: &mut turbos_clmm::position_manager::Positions,
-        arg17: &sui::clock::Clock,
-        arg18: &turbos_clmm::pool::Versioned,
-        arg19: &mut sui::tx_context::TxContext
-    ) {
-        abort 0
-    }
+    // public fun rebalance<T0, T1, T2>(
+    //     arg0: &turbos_vault::config::OperatorCap,
+    //     arg1: &turbos_vault::config::GlobalConfig,
+    //     arg2: &mut turbos_vault::rewarder::RewarderManager,
+    //     arg3: &mut Strategy,
+    //     arg4: sui::object::ID,
+    //     arg5: bool, arg6: bool,
+    //     arg7: u32,
+    //     arg8: bool,
+    //     arg9: u32,
+    //     arg10: bool,
+    //     arg11: u32,
+    //     arg12: bool,
+    //     arg13: u32,
+    //     arg14: bool,
+    //     arg15: &mut turbos_clmm::pool::Pool<T0, T1, T2>,
+    //     arg16: &mut turbos_clmm::position_manager::Positions,
+    //     arg17: &sui::clock::Clock,
+    //     arg18: &turbos_clmm::pool::Versioned,
+    //     arg19: &mut sui::tx_context::TxContext
+    // ) {
+    //     abort 0
+    // }
     
     public fun rebalance_with_fee<T0, T1, T2>(
         arg0: &turbos_vault::config::OperatorCap,

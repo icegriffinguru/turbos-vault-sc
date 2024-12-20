@@ -5,6 +5,7 @@ published-at = "0xf68900420a41636be9f5a9fc3a88cbe4922ed35895620fe8003702a459c4a0
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir="crates/sui-framework/packages/sui-framework", rev = "mainnet" }
+TurbosCLMM = { git = "https://github.com/turbos-finance/turbos-sui-move-interface.git", subdir = "clmm", rev = "main" }
 
 [addresses]
-turbos_clmm = "turbos_clmm"
+turbos_vault = "0x0"
