@@ -1,0 +1,10 @@
+[package]
+name = "TurbosVault"
+version = "0.1.0"
+published-at = "0xf68900420a41636be9f5a9fc3a88cbe4922ed35895620fe8003702a459c4a084"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir="crates/sui-framework/packages/sui-framework", rev = "mainnet" }
+
+[addresses]
+turbos_clmm = "turbos_clmm"
